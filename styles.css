@@ -1,0 +1,231 @@
+/* InSightLiker – Real Land Custom Stylesheet */
+:root {
+  --primary: #003625;
+  --primary-container: #134e39;
+  --on-primary: #ffffff;
+  --secondary: #8b4f27;
+  --secondary-container: #feaf7f;
+  --tertiary: #3e2b00;
+  --tertiary-fixed: #ffdea3;
+  --surface: #f0fdf3;
+  --surface-container-low: #eaf7ed;
+  --surface-container: #e4f1e7;
+  --surface-container-high: #dfebe2;
+  --surface-container-lowest: #ffffff;
+  --on-surface: #131e18;
+  --on-surface-variant: #404944;
+  --gold-accent: #c59a3f;
+  --gold-soft: #fcf8ee;
+  --border-light: #e2e8e4;
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f0fdf3;
+}
+::-webkit-scrollbar-thumb {
+  background: #c0c9c2;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #134e39;
+}
+
+/* Base resets & typography */
+html {
+  scroll-behavior: smooth;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--on-surface);
+  background-color: var(--surface);
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Micro animations & transitions */
+.transition-spring {
+  transition: all 400ms var(--ease-spring);
+}
+
+/* Double-Bezel Card Architecture */
+.double-bezel-card {
+  position: relative;
+  background-color: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(19, 78, 57, 0.04), 0 1px 2px rgba(19, 78, 57, 0.02);
+  transition: all 350ms var(--ease-spring);
+}
+.double-bezel-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -6px rgba(19, 78, 57, 0.1), 0 4px 10px -2px rgba(19, 78, 57, 0.04);
+  border-color: rgba(19, 78, 57, 0.2);
+}
+
+/* Glassmorphism Navigation */
+.glass-nav {
+  background: rgba(240, 253, 243, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(192, 201, 194, 0.4);
+}
+
+/* Gold Verified Trust Seal */
+.verified-seal-badge {
+  background: linear-gradient(135deg, #134e39 0%, #002b1d 100%);
+  color: #ffdea3;
+  box-shadow: 0 2px 8px rgba(0, 54, 37, 0.25);
+  border: 1px solid rgba(255, 222, 163, 0.4);
+}
+
+/* Owner Listed Chip Badge */
+.owner-listed-chip {
+  background: #fcf8ee;
+  color: #8b4f27;
+  border: 1px solid #feaf7f;
+  box-shadow: 0 1px 2px rgba(139, 79, 39, 0.06);
+}
+
+/* Button Kinetic Pulsing Effect on Hover */
+.btn-primary-kinetic {
+  background: #134e39;
+  color: #ffffff;
+  transition: all 300ms var(--ease-spring);
+}
+.btn-primary-kinetic:hover {
+  background: #003625;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(19, 78, 57, 0.28);
+}
+.btn-primary-kinetic:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary-kinetic {
+  background: #8b4f27;
+  color: #ffffff;
+  transition: all 300ms var(--ease-spring);
+}
+.btn-secondary-kinetic:hover {
+  background: #6e3812;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(139, 79, 39, 0.28);
+}
+.btn-secondary-kinetic:active {
+  transform: scale(0.98);
+}
+
+/* Map Styling & Custom Marker Pins */
+.custom-pin-cluster {
+  background: transparent;
+  border: none;
+}
+.custom-map-marker {
+  position: relative;
+  background: #134e39;
+  color: #ffffff;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  box-shadow: 0 3px 10px rgba(0, 54, 37, 0.35);
+  border: 2px solid #ffffff;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+.custom-map-marker:hover, .custom-map-marker.active {
+  background: #8b4f27;
+  transform: scale(1.12);
+  z-index: 1000 !important;
+}
+.custom-map-marker::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 5px 0 5px;
+  border-style: solid;
+  border-color: #134e39 transparent transparent transparent;
+}
+.custom-map-marker:hover::after, .custom-map-marker.active::after {
+  border-color: #8b4f27 transparent transparent transparent;
+}
+
+/* Range input custom styling */
+input[type="range"].accent-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #dfebe2;
+  height: 6px;
+  border-radius: 9999px;
+  outline: none;
+}
+input[type="range"].accent-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #134e39;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: transform 150ms ease;
+}
+input[type="range"].accent-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+  background: #8b4f27;
+}
+
+/* Modal Blur backdrop */
+.modal-backdrop-blur {
+  background-color: rgba(19, 30, 24, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Shimmer animation for verified badges */
+@keyframes goldShine {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.badge-gold-shine {
+  background: linear-gradient(90deg, #ffdea3 0%, #ffffff 50%, #ffdea3 100%);
+  background-size: 200% 100%;
+  color: #3e2b00;
+}
+
+/* Page fade transitions */
+.view-container {
+  animation: fadeIn 300ms ease-out forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Unit tag pill */
+.unit-badge {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Safe areas for mobile */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+}

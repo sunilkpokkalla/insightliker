@@ -1,0 +1,22 @@
+{
+  "name": "insightliker-real-land",
+  "version": "1.0.0",
+  "description": "South India's Direct Land Marketplace (0% Brokerage)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "real-estate",
+    "land-marketplace",
+    "telangana",
+    "karnataka",
+    "andhra-pradesh",
+    "tamil-nadu",
+    "kerala",
+    "direct-owner"
+  ],
+  "author": "InSightLiker Team",
+  "license": "ISC"
+}

@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>InSightLiker Real Land | South India's Direct Land Marketplace (0% Brokerage)</title>
+  <meta name="description" content="Buy and sell agricultural lands, residential plots, plantations, and industrial parcels directly with verified landowners across Telangana, Karnataka, Andhra Pradesh, Tamil Nadu, and Kerala.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23134e39'><path d='M12 3L2 12h3v8h14v-8h3L12 3zm0 3.84L17 11.3V18H7v-6.7l5-4.46z'/></svg>">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Google Material Symbols Outlined -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <!-- Leaflet CSS for Interactive Map View -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'primary': '#003625',
+            'primary-container': '#134e39',
+            'on-primary': '#ffffff',
+            'secondary': '#8b4f27',
+            'secondary-container': '#feaf7f',
+            'tertiary': '#3e2b00',
+            'tertiary-fixed': '#ffdea3',
+            'surface': '#f0fdf3',
+            'surface-container-low': '#eaf7ed',
+            'surface-container': '#e4f1e7',
+            'surface-container-high': '#dfebe2',
+            'surface-container-lowest': '#ffffff',
+            'on-surface': '#131e18',
+            'on-surface-variant': '#404944',
+            'border-light': '#e2e8e4',
+            'gold-accent': '#c59a3f'
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'sans-serif'],
+            heading: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col font-sans selection:bg-secondary-container selection:text-secondary">
+
+  <!-- Top Announcement / Trust Banner -->
+  <div class="bg-primary text-tertiary-fixed text-[11px] md:text-xs py-1.5 px-4 font-semibold tracking-wide border-b border-white/10 flex items-center justify-between">
+    <div class="container mx-auto flex items-center justify-between flex-wrap gap-2">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-tertiary-fixed text-tertiary font-bold text-[10px]">VERIFIED 2026</span>
+        <span data-i18n="trustBanner">100% Direct Owners Only • Zero Brokerage & Zero Middlemen Guarantee</span>
+      </div>
+      <div class="hidden sm:flex items-center gap-4 text-white/80">
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-tertiary-fixed">gavel</span> Dharani • Bhoomi • Meebhoomi Verified</span>
+        <button onclick="app.openUnitConverter()" class="hover:text-tertiary-fixed transition-colors flex items-center gap-1 font-bold">
+          <span class="material-symbols-outlined text-[14px]">calculate</span> <span data-i18n="calcLink">Land Unit Calculator</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Bar -->
+  <header class="sticky top-0 z-40 glass-nav transition-all duration-300">
+    <div class="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-3">
+      
+      <!-- Brand Logo -->
+      <a href="#home" class="flex items-center gap-2.5 shrink-0 group">
+        <div class="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary-container text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+          <span class="material-symbols-outlined text-[24px] text-tertiary-fixed">landscape</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-heading font-extrabold text-lg md:text-xl text-primary tracking-tight leading-none flex items-center gap-1">
+            InSightLiker <span class="text-secondary font-bold text-xs uppercase px-1.5 py-0.5 rounded bg-surface-container border border-secondary-container">Real Land</span>
+          </span>
+          <span class="text-[10px] md:text-[11px] font-semibold text-secondary mt-0.5">South India Direct Marketplace</span>
+        </div>
+      </a>
+
+      <!-- State Quick Filter in Header -->
+      <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container border border-border-light text-xs font-medium text-on-surface">
+        <span class="material-symbols-outlined text-[16px] text-primary">pin_drop</span>
+        <select id="headerStateSelect" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer pr-1">
+          <option value="all">All South India</option>
+          <option value="Telangana">Telangana (Dharani)</option>
+          <option value="Karnataka">Karnataka (Bhoomi / Kaveri)</option>
+          <option value="Andhra Pradesh">Andhra Pradesh (Meebhoomi)</option>
+          <option value="Tamil Nadu">Tamil Nadu (Patta Chitta)</option>
+          <option value="Kerala">Kerala (Re-Survey)</option>
+        </select>
+      </div>
+
+      <!-- Language Quick Switcher in Header -->
+      <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container border border-border-light text-xs font-semibold text-primary">
+        <span class="material-symbols-outlined text-[16px] text-primary">translate</span>
+        <select id="headerLangSelect" onchange="app.setLanguage(this.value)" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer pr-1">
+          <option value="en">English (EN)</option>
+          <option value="te">తెలుగు (Telugu)</option>
+          <option value="kn">ಕನ್ನಡ (Kannada)</option>
+          <option value="ta">தமிழ் (Tamil)</option>
+          <option value="ml">മലയാളം (Malayalam)</option>
+        </select>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+        <a href="#home" data-nav-target="home" class="hover:text-primary transition-colors py-1"><span data-i18n="navHome">Home</span></a>
+        <a href="#properties" data-nav-target="properties" class="hover:text-primary transition-colors py-1 flex items-center gap-1">
+          <span data-i18n="navExplore">Explore Lands</span>
+          <span class="w-2 h-2 rounded-full bg-secondary"></span>
+        </a>
+        <a href="#list-property" data-nav-target="list-property" class="hover:text-primary transition-colors py-1 flex items-center gap-1 text-secondary font-semibold">
+          <span class="material-symbols-outlined text-[18px]">add_circle</span>
+          <span data-i18n="navListFree">List Free</span>
+        </a>
+        <a href="#dashboard" data-nav-target="dashboard" class="hover:text-primary transition-colors py-1 flex items-center gap-1">
+          <span data-i18n="navDashboard">Dashboard</span>
+        </a>
+        <a href="#saved" data-nav-target="saved" class="hover:text-primary transition-colors py-1 flex items-center gap-1 relative">
+          <span data-i18n="navSaved">Saved</span>
+          <span id="savedNavBadge" class="hidden px-1.5 py-0.2 rounded-full bg-secondary text-white text-[10px] font-bold">0</span>
+        </a>
+      </nav>
+
+      <!-- Right Header Actions (Auth & Controls) -->
+      <div class="flex items-center gap-2.5">
+        
+        <!-- Unit Converter Button -->
+        <button id="unitConverterBtn" class="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border-light bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-primary transition-colors" title="Convert Acres, Guntas, Cents, Sq.Yards">
+          <span class="material-symbols-outlined text-[16px]">calculate</span>
+          <span data-i18n="navConverter">Converter</span>
+        </button>
+
+        <!-- Firebase Authentication Section in Header -->
+        <div id="authHeaderContainer" class="relative">
+          
+          <!-- State 1: Unauthenticated -->
+          <button id="authNavBtn" onclick="app.openAuthModal('signin')" class="py-2 px-3.5 rounded-xl btn-primary-kinetic text-xs md:text-sm font-bold flex items-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">account_circle</span>
+            <span class="hidden sm:inline" data-i18n="navSignIn">Sign In / Register</span>
+            <span class="sm:hidden">Sign In</span>
+          </button>
+
+          <!-- State 2: Authenticated User Pill (Hidden by default) -->
+          <div id="authNavUser" class="hidden relative">
+            <button onclick="app.toggleUserMenu()" class="flex items-center gap-2 py-1.5 px-3 rounded-full bg-surface-container-high border border-border-light hover:border-primary transition-all">
+              <div id="authUserAvatar" class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-sm overflow-hidden">
+                U
+              </div>
+              <div class="hidden sm:flex flex-col text-left">
+                <span id="authUserName" class="text-xs font-bold text-primary truncate max-w-[120px]">User</span>
+                <span id="authUserRoleBadge" class="text-[9px] font-semibold text-secondary uppercase tracking-wider leading-none">Buyer</span>
+              </div>
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">expand_more</span>
+            </button>
+
+            <!-- User Dropdown Menu -->
+            <div id="authUserDropdown" class="hidden absolute right-0 mt-2 w-64 bg-surface-container-lowest rounded-2xl shadow-xl border border-border-light py-2 z-50 animate-fadeIn">
+              <div class="px-4 py-2 border-b border-border-light">
+                <p id="dropdownUserEmail" class="text-xs text-on-surface-variant truncate">user@example.com</p>
+                <div class="mt-1 flex items-center justify-between">
+                  <span id="dropdownRoleLabel" class="text-[11px] font-bold text-primary px-2 py-0.5 rounded-full bg-surface-container">Verified Buyer</span>
+                  <button onclick="app.toggleUserRole()" class="text-[10px] text-secondary font-bold hover:underline">Switch Role</button>
+                </div>
+              </div>
+
+              <div class="py-1">
+                <a href="#dashboard" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors">
+                  <span class="material-symbols-outlined text-[18px] text-primary">dashboard</span>
+                  <span>Dashboard & Inquiries</span>
+                </a>
+                <a href="#list-property" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors">
+                  <span class="material-symbols-outlined text-[18px] text-secondary">add_business</span>
+                  <span>List New Land (Free)</span>
+                </a>
+                <a href="#saved" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors">
+                  <span class="material-symbols-outlined text-[18px] text-primary">bookmark</span>
+                  <span>My Saved Properties</span>
+                </a>
+                <button onclick="app.openFirebaseConfigModal()" class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors text-left">
+                  <span class="material-symbols-outlined text-[18px] text-amber-600">settings</span>
+                  <span>Firebase Keys & Status</span>
+                </button>
+              </div>
+
+              <div class="pt-1 border-t border-border-light">
+                <button onclick="app.handleSignOut()" class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors text-left">
+                  <span class="material-symbols-outlined text-[18px]">logout</span>
+                  <span data-i18n="navSignOut">Sign Out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Mobile Drawer Hamburger Toggle -->
+        <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" title="Toggle Navigation">
+          <span class="material-symbols-outlined text-[24px]">menu</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Mobile Drawer Overlay & Panel -->
+  <div id="mobileDrawer" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" id="closeDrawerBtn"></div>
+    <div class="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] bg-surface-container-lowest p-6 shadow-2xl flex flex-col justify-between z-10 overflow-y-auto">
+      <div class="flex flex-col gap-6">
+        <div class="flex items-center justify-between pb-4 border-b border-border-light">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[24px]">landscape</span>
+            <span class="font-heading font-extrabold text-base text-primary">InSightLiker Real Land</span>
+          </div>
+          <button onclick="document.getElementById('mobileDrawer').classList.add('hidden')" class="p-1.5 rounded-full hover:bg-surface-container text-on-surface">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <!-- Mobile Auth Banner -->
+        <div id="mobileAuthBanner" class="p-3.5 rounded-xl bg-surface-container-low border border-border-light flex flex-col gap-2">
+          <div id="mobileAuthUnlogged">
+            <p class="text-xs text-on-surface-variant font-medium">Join South India's 100% direct landowner marketplace.</p>
+            <button onclick="app.openAuthModal('signin'); document.getElementById('mobileDrawer').classList.add('hidden')" class="mt-2 w-full py-2.5 rounded-lg btn-primary-kinetic text-xs font-bold flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">login</span>
+              <span>Sign In / Create Account</span>
+            </button>
+          </div>
+          <div id="mobileAuthLogged" class="hidden flex flex-col gap-1.5">
+            <div class="flex items-center gap-2">
+              <div id="mobileUserAvatar" class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs">U</div>
+              <div>
+                <h4 id="mobileUserName" class="text-xs font-bold text-primary">User</h4>
+                <span id="mobileUserRoleBadge" class="text-[10px] text-secondary font-semibold uppercase">Verified Buyer</span>
+              </div>
+            </div>
+            <button onclick="app.handleSignOut(); document.getElementById('mobileDrawer').classList.add('hidden')" class="mt-2 text-xs font-bold text-red-600 text-left flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px]">logout</span> Sign Out
+            </button>
+          </div>
+        </div>
+
+        <!-- Navigation Links in Drawer -->
+        <nav class="flex flex-col gap-2 text-sm font-semibold">
+          <a href="#home" onclick="document.getElementById('mobileDrawer').classList.add('hidden')" class="mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-primary">
+            <span class="material-symbols-outlined text-[20px]">home</span> <span data-i18n="navHome">Home</span>
+          </a>
+          <a href="#properties" onclick="document.getElementById('mobileDrawer').classList.add('hidden')" class="mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">travel_explore</span> <span data-i18n="navExplore">Explore Land Parcels</span>
+          </a>
+          <a href="#list-property" onclick="document.getElementById('mobileDrawer').classList.add('hidden')" class="mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-secondary font-bold">
+            <span class="material-symbols-outlined text-[20px]">add_box</span> <span data-i18n="navListFree">List Your Land Free (0%)</span>
+          </a>
+          <a href="#dashboard" onclick="document.getElementById('mobileDrawer').classList.add('hidden')" class="mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-primary font-bold">
+            <span class="material-symbols-outlined text-[20px]">dashboard</span> <span data-i18n="navDashboard">Dashboard & Inquiries</span>
+          </a>
+          <a href="#saved" onclick="document.getElementById('mobileDrawer').classList.add('hidden')" class="mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">bookmark</span> <span data-i18n="navSaved">Saved Lands</span>
+          </a>
+          <button onclick="app.openUnitConverter(); document.getElementById('mobileDrawer').classList.add('hidden')" class="py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-on-surface-variant text-left">
+            <span class="material-symbols-outlined text-[20px]">calculate</span> <span data-i18n="calcLink">Land Area Converter</span>
+          </button>
+          <a href="#about" onclick="document.getElementById('mobileDrawer').classList.add('hidden')" class="mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">verified_user</span> Verification Standard
+          </a>
+          <a href="#contact" onclick="document.getElementById('mobileDrawer').classList.add('hidden')" class="mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">call</span> Anti-Broker Helpline
+          </a>
+        </nav>
+      </div>
+
+      <!-- Drawer Footer with Languages -->
+      <div class="pt-4 border-t border-border-light flex flex-col gap-2">
+        <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">South Indian Languages</span>
+        <div class="grid grid-cols-5 gap-1 text-center">
+          <button data-lang="en" onclick="app.setLanguage('en')" class="py-1.5 rounded bg-primary-container text-white text-xs font-bold">EN</button>
+          <button data-lang="te" onclick="app.setLanguage('te')" class="py-1.5 rounded bg-surface-container-high text-on-surface text-xs font-bold">తె</button>
+          <button data-lang="kn" onclick="app.setLanguage('kn')" class="py-1.5 rounded bg-surface-container-high text-on-surface text-xs font-bold">ಕ</button>
+          <button data-lang="ta" onclick="app.setLanguage('ta')" class="py-1.5 rounded bg-surface-container-high text-on-surface text-xs font-bold">த</button>
+          <button data-lang="ml" onclick="app.setLanguage('ml')" class="py-1.5 rounded bg-surface-container-high text-on-surface text-xs font-bold">മ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP VIEWS CONTAINER -->
+  <main class="flex-1">
+
+    <!-- ========================================== -->
+    <!-- VIEW: HOME                                 -->
+    <!-- ========================================== -->
+    <section id="view-home" class="view-container">
+      
+      <!-- Hero Section -->
+      <div class="relative bg-gradient-to-b from-primary via-[#002b1d] to-[#041a12] text-white pt-12 pb-20 px-4 overflow-hidden">
+        
+        <!-- Subtle Pattern Overlay -->
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#feaf7f_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
+
+        <div class="container mx-auto max-w-5xl relative z-10 text-center flex flex-col items-center gap-5">
+          
+          <!-- Trust Badge Pill -->
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs md:text-sm font-semibold text-tertiary-fixed shadow-inner">
+            <span class="material-symbols-outlined text-[16px]">verified</span>
+            <span data-i18n="heroTrustPill">Zero Brokerage • 100% Direct Landowners Only</span>
+          </div>
+
+          <!-- Main Hero Headline -->
+          <h1 id="heroTitle" data-i18n="heroTitle" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold tracking-tight text-white leading-tight max-w-4xl">
+            South India's Direct <br class="hidden sm:inline">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-tertiary-fixed via-secondary-container to-white">Land & Acreage Marketplace</span>
+          </h1>
+
+          <!-- Multi-language Subtitle Prompt -->
+          <p id="heroLangHint" data-i18n="heroSubtitle" class="text-sm md:text-lg text-white/80 max-w-2xl leading-relaxed">
+            South India's direct marketplace for Agricultural Land, Plots & Industrial Property with clean titles & direct landowner contacts.
+          </p>
+
+          <!-- Language Chips Selector -->
+          <div class="flex items-center justify-center gap-1.5 flex-wrap">
+            <span class="text-xs text-white/60 mr-1" data-i18n="viewInLang">View in:</span>
+            <button data-lang="en" onclick="app.setLanguage('en')" class="px-2.5 py-1 rounded-full bg-primary-container text-white text-xs font-bold hover:scale-105 transition-transform">English</button>
+            <button data-lang="te" onclick="app.setLanguage('te')" class="px-2.5 py-1 rounded-full bg-white/15 text-white/90 text-xs font-bold hover:bg-white/25 transition-colors">తెలుగు (Telangana & AP)</button>
+            <button data-lang="kn" onclick="app.setLanguage('kn')" class="px-2.5 py-1 rounded-full bg-white/15 text-white/90 text-xs font-bold hover:bg-white/25 transition-colors">ಕನ್ನಡ (Karnataka)</button>
+            <button data-lang="ta" onclick="app.setLanguage('ta')" class="px-2.5 py-1 rounded-full bg-white/15 text-white/90 text-xs font-bold hover:bg-white/25 transition-colors">தமிழ் (Tamil Nadu)</button>
+            <button data-lang="ml" onclick="app.setLanguage('ml')" class="px-2.5 py-1 rounded-full bg-white/15 text-white/90 text-xs font-bold hover:bg-white/25 transition-colors">മലയാളം (Kerala)</button>
+          </div>
+
+          <!-- Hero Search Box Card -->
+          <div class="w-full max-w-3xl mt-4 p-2.5 sm:p-3.5 rounded-2xl bg-white/95 backdrop-blur-md shadow-2xl border border-white/40 flex flex-col sm:flex-row gap-2 items-center text-on-surface">
+            
+            <div class="flex-1 flex items-center gap-2 px-3 py-2 w-full">
+              <span class="material-symbols-outlined text-[20px] text-primary">search</span>
+              <input type="text" id="heroSearchInput" data-i18n-placeholder="heroSearchPlaceholder" placeholder="Search by Corridor (Chevella, Sarjapur, Tada, Coimbatore, Wayanad)..." class="w-full text-sm font-medium bg-transparent focus:outline-none placeholder:text-on-surface-variant/70">
+            </div>
+
+            <div class="h-8 w-px bg-border-light hidden sm:block"></div>
+
+            <select id="heroCategorySelect" class="w-full sm:w-auto px-3 py-2 text-xs font-bold text-primary bg-surface-container rounded-xl focus:outline-none cursor-pointer">
+              <option value="All">All Land Types</option>
+              <option value="Agricultural">Agricultural Land</option>
+              <option value="Residential Plots">Residential Plots</option>
+              <option value="Industrial Land">Industrial Parcels</option>
+              <option value="Plantation">Plantation / Hill Farm</option>
+            </select>
+
+            <button onclick="app.handleHeroSearch()" class="w-full sm:w-auto px-6 py-3 rounded-xl btn-primary-kinetic text-xs md:text-sm font-bold flex items-center justify-center gap-1.5 shrink-0">
+              <span class="material-symbols-outlined text-[18px]">search</span>
+              <span data-i18n="heroSearchBtn">Find Direct Lands</span>
+            </button>
+          </div>
+
+          <!-- Popular Corridors Chips -->
+          <div class="flex items-center justify-center gap-2 flex-wrap text-xs text-white/80 mt-1">
+            <span class="text-white/60 font-medium">Hot Corridors:</span>
+            <a href="#properties/state-Telangana" class="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors">Chevella / Vikarabad (TS)</a>
+            <a href="#properties/state-Karnataka" class="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors">Sarjapur / Attibele (KA)</a>
+            <a href="#properties/state-Andhra Pradesh" class="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors">Tada / Sri City (AP)</a>
+            <a href="#properties/state-Tamil Nadu" class="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors">Coimbatore / Pollachi (TN)</a>
+            <a href="#properties/state-Kerala" class="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors">Wayanad / Idukki (KL)</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Key Value Pillars -->
+      <div class="container mx-auto px-4 -mt-8 relative z-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <div class="p-5 rounded-2xl bg-white border border-border-light shadow-md flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-surface-container text-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[28px] text-primary">person_check</span>
+            </div>
+            <div>
+              <h3 class="font-heading font-bold text-base text-primary" data-i18n="pillar1Title">100% Direct Owners</h3>
+              <p class="text-xs text-on-surface-variant mt-1 leading-relaxed" data-i18n="pillar1Desc">
+                Connect directly with the genuine farmer or title holder. Every broker report is investigated within 2 hours.
+              </p>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-border-light shadow-md flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-surface-container text-secondary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[28px] text-secondary">money_off</span>
+            </div>
+            <div>
+              <h3 class="font-heading font-bold text-base text-secondary" data-i18n="pillar2Title">Zero Brokerage (0%)</h3>
+              <p class="text-xs text-on-surface-variant mt-1 leading-relaxed" data-i18n="pillar2Desc">
+                Never pay 2% to 5% commission. Free property listing for landowners; free unmasked contact numbers for buyers.
+              </p>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-border-light shadow-md flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-surface-container text-amber-700 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[28px] text-amber-700">verified_user</span>
+            </div>
+            <div>
+              <h3 class="font-heading font-bold text-base text-primary" data-i18n="pillar3Title">Govt Portal Verified</h3>
+              <p class="text-xs text-on-surface-variant mt-1 leading-relaxed" data-i18n="pillar3Desc">
+                Verified digital passbooks on Telangana Dharani, Karnataka Bhoomi / Kaveri, AP Meebhoomi, and TN Patta Chitta.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Featured Direct Lands Section -->
+      <section class="container mx-auto px-4 py-16">
+        <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8">
+          <div>
+            <span class="text-xs font-bold text-secondary uppercase tracking-wider" data-i18n="featuredTagline">Direct Landowner Showcase</span>
+            <h2 class="text-2xl md:text-3xl font-heading font-bold text-primary mt-1" data-i18n="featuredHeading">Featured Verified Parcels</h2>
+            <p class="text-xs md:text-sm text-on-surface-variant mt-0.5" data-i18n="featuredDesc">Inspected survey boundary stones, direct road approach, and authenticated land records.</p>
+          </div>
+          <a href="#properties" class="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-primary font-bold text-xs flex items-center gap-1 transition-colors">
+            <span data-i18n="viewAllLands">View All Land Parcels</span>
+            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </a>
+        </div>
+
+        <div id="homeFeaturedContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Dynamically populated by app.renderHome() -->
+        </div>
+      </section>
+
+      <!-- Direct Landowner Callout Banner -->
+      <section class="container mx-auto px-4 pb-16">
+        <div class="rounded-3xl bg-gradient-to-r from-primary via-primary-container to-[#022e20] p-8 md:p-12 text-white shadow-xl flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
+          <div class="relative z-10 max-w-2xl">
+            <span class="px-3 py-1 rounded-full bg-secondary text-white font-bold text-xs uppercase tracking-wider" data-i18n="farmerBadge">For Farmers & Landowners</span>
+            <h2 class="text-2xl md:text-4xl font-heading font-bold mt-3 leading-snug" data-i18n="sellerBannerTitle">
+              Sell your agricultural land or plot directly. No agents, no commission.
+            </h2>
+            <p class="text-sm md:text-base text-white/80 mt-2 leading-relaxed" data-i18n="sellerBannerDesc">
+              List your land in 3 minutes. Your contact number is directly accessible by verified corporate, farm, and individual buyers across India.
+            </p>
+            <div class="flex items-center gap-4 mt-6 flex-wrap">
+              <a href="#list-property" class="py-3 px-6 rounded-xl bg-tertiary-fixed text-tertiary font-extrabold text-sm hover:scale-105 transition-transform flex items-center gap-2 shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">add_circle</span>
+                <span data-i18n="sellerBannerBtn">List Your Property 100% Free</span>
+              </a>
+              <button onclick="app.openAuthModal('signup', 'seller')" class="py-3 px-5 rounded-xl border border-white/30 hover:bg-white/10 font-bold text-sm transition-colors flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+                <span data-i18n="sellerRegisterBtn">Register as Landowner</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="relative z-10 w-full lg:w-auto shrink-0 bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 text-center">
+            <div class="text-3xl md:text-4xl font-heading font-black text-tertiary-fixed">₹0</div>
+            <div class="text-xs font-bold text-white uppercase tracking-wider mt-1" data-i18n="brokerageSavedHero">Brokerage Forever</div>
+            <p class="text-[11px] text-white/70 mt-2 max-w-[200px]">Save ₹50,000 to ₹5,00,000 in broker fees per land transaction.</p>
+          </div>
+        </div>
+      </section>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW: PROPERTIES (SEARCH, FILTER & MAP)    -->
+    <!-- ========================================== -->
+    <section id="view-properties" class="view-container hidden">
+      <div class="container mx-auto px-4 py-8">
+        
+        <!-- Header & Breadcrumbs -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border-light">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-heading font-bold text-primary" data-i18n="exploreTitle">Explore Direct Land Parcels</h1>
+            <p class="text-xs md:text-sm text-on-surface-variant mt-0.5" data-i18n="exploreSubtitle">Filter by state, price, road width, and soil condition. Zero broker middle-man interference.</p>
+          </div>
+
+          <!-- Mode Toggle: Grid Cards vs Interactive Map -->
+          <div class="flex items-center gap-2 p-1 rounded-xl bg-surface-container border border-border-light self-start md:self-auto">
+            <button id="viewModeGridBtn" onclick="app.setViewMode('grid')" class="px-3.5 py-1.5 rounded-lg bg-primary-container text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all">
+              <span class="material-symbols-outlined text-[16px]">grid_view</span>
+              <span data-i18n="btnGridView">Grid View</span>
+            </button>
+            <button id="viewModeMapBtn" onclick="app.setViewMode('map')" class="px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:text-primary text-xs font-bold flex items-center gap-1.5 transition-all">
+              <span class="material-symbols-outlined text-[16px]">map</span>
+              <span data-i18n="btnMap">GPS Map</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="mt-6 p-4 rounded-2xl bg-surface-container-low border border-border-light flex flex-col gap-4">
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            
+            <!-- Filter State -->
+            <div>
+              <label class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1" data-i18n="labelState">State / Ledger</label>
+              <select id="filterStateSelect" class="w-full px-3 py-2 rounded-xl bg-white border border-border-light text-xs font-semibold text-primary focus:outline-none">
+                <option value="All">All South India</option>
+                <option value="Telangana">Telangana (Dharani)</option>
+                <option value="Karnataka">Karnataka (Bhoomi / Kaveri)</option>
+                <option value="Andhra Pradesh">Andhra Pradesh (Meebhoomi)</option>
+                <option value="Tamil Nadu">Tamil Nadu (Patta Chitta)</option>
+                <option value="Kerala">Kerala (Re-Survey)</option>
+              </select>
+            </div>
+
+            <!-- Filter Category -->
+            <div>
+              <label class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1" data-i18n="labelCategory">Land Category</label>
+              <select id="filterCategorySelect" class="w-full px-3 py-2 rounded-xl bg-white border border-border-light text-xs font-semibold text-primary focus:outline-none">
+                <option value="All">All Categories</option>
+                <option value="Agricultural">Agricultural Land</option>
+                <option value="Residential Plots">Residential Plots</option>
+                <option value="Industrial Land">Industrial Land</option>
+                <option value="Plantation">Plantation / Farm</option>
+              </select>
+            </div>
+
+            <!-- Filter Price Slider -->
+            <div>
+              <div class="flex items-center justify-between text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                <span data-i18n="labelMaxBudget">Max Budget:</span>
+                <span id="filterPriceDisplay" class="text-primary font-extrabold">₹10 Crores</span>
+              </div>
+              <input type="range" id="filterPriceRange" min="0.2" max="10" step="0.2" value="10" class="w-full accent-slider">
+            </div>
+
+            <!-- Search Keyword -->
+            <div>
+              <label class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1" data-i18n="labelCorridor">Corridor or Mandal</label>
+              <div class="relative">
+                <input type="text" id="filterSearchKeyword" data-i18n-placeholder="filterSearchPlaceholder" placeholder="e.g. Chevella, Sarjapur, NH-44..." class="w-full px-3 py-2 pr-8 rounded-xl bg-white border border-border-light text-xs font-semibold focus:outline-none">
+                <span class="material-symbols-outlined absolute right-2.5 top-2 text-[16px] text-on-surface-variant pointer-events-none">search</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Filter Row & Reset -->
+          <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-border-light text-xs">
+            <span id="propertiesResultCount" class="font-bold text-primary">12 Direct Land Parcels</span>
+            <button onclick="app.resetFilters()" class="text-secondary font-bold hover:underline flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">restart_alt</span> <span data-i18n="btnResetFilters">Reset Filters</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Interactive GPS Leaflet Map Wrapper (Hidden by default until toggled) -->
+        <div id="propertiesMapWrapper" class="hidden mt-6 rounded-2xl overflow-hidden border border-border-light shadow-md bg-white">
+          <div class="p-3 bg-surface-container flex items-center justify-between text-xs font-semibold text-primary border-b border-border-light">
+            <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">location_on</span> Live Land Pins Across South India</span>
+            <span class="text-[11px] text-on-surface-variant">Click any pin to inspect direct price & survey details</span>
+          </div>
+          <div id="leafletMapContainer" class="w-full h-[520px]"></div>
+        </div>
+
+        <!-- Properties Grid Display Container -->
+        <div id="propertiesGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          <!-- Dynamically populated by app.renderProperties() -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW: LIST PROPERTY (FREE SELLER WIZARD)   -->
+    <!-- ========================================== -->
+    <section id="view-list-property" class="view-container hidden">
+      <div class="container mx-auto px-4 py-12 max-w-3xl">
+        
+        <div class="text-center mb-8">
+          <span class="px-3 py-1 rounded-full bg-secondary-container text-secondary font-bold text-xs uppercase tracking-wider">Direct Landowner Portal</span>
+          <h1 class="text-2xl md:text-4xl font-heading font-extrabold text-primary mt-2" data-i18n="listTitle">List Your Land 100% Free</h1>
+          <p class="text-xs md:text-sm text-on-surface-variant mt-1 max-w-lg mx-auto" data-i18n="listSubtitle">
+            Zero brokerage, zero listing fee. Reach genuine land buyers, investors, and agribusinesses directly.
+          </p>
+        </div>
+
+        <!-- Authenticated Landowner Status Banner -->
+        <div id="listAuthNotice" class="p-4 rounded-2xl bg-surface-container border border-border-light mb-6 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary text-[28px]">shield_person</span>
+            <div>
+              <h4 id="listAuthTitle" class="text-xs font-bold text-primary">Listing as Verified User</h4>
+              <p id="listAuthDesc" class="text-[11px] text-on-surface-variant">Your listing will be linked to your account.</p>
+            </div>
+          </div>
+          <button id="listAuthActionBtn" onclick="app.openAuthModal('signin', 'seller')" class="px-3 py-1.5 rounded-lg btn-primary-kinetic text-xs font-bold">
+            Sign In / Register
+          </button>
+        </div>
+
+        <!-- 4-Step Form Card -->
+        <form id="listPropertyForm" onsubmit="event.preventDefault(); app.handleListPropertySubmit(this)" class="p-6 md:p-8 rounded-3xl bg-white border border-border-light shadow-xl flex flex-col gap-6">
+          
+          <!-- Step 1: Basic Land Details -->
+          <div>
+            <div class="flex items-center gap-2 pb-2 border-b border-border-light mb-4">
+              <span class="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">1</span>
+              <h3 class="font-heading font-bold text-base text-primary" data-i18n="step1Title">Land Location & Type</h3>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="sm:col-span-2">
+                <label class="text-xs font-semibold text-on-surface block mb-1">Listing Headline</label>
+                <input type="text" name="title" required placeholder="e.g. 5 Acres Fertile Red Soil Land with 2 Borewells" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-on-surface block mb-1">State</label>
+                <select name="state" required class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+                  <option value="Telangana">Telangana</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Andhra Pradesh">Andhra Pradesh</option>
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="Kerala">Kerala</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-on-surface block mb-1">Category</label>
+                <select name="category" required class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+                  <option value="Agricultural">Agricultural Land</option>
+                  <option value="Residential Plots">Residential Plots</option>
+                  <option value="Industrial Land">Industrial Land</option>
+                  <option value="Plantation">Plantation / Farm</option>
+                  <option value="Commercial">Commercial Land</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-on-surface block mb-1">District</label>
+                <input type="text" name="district" required placeholder="e.g. Vikarabad / Rangareddy" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-on-surface block mb-1">Corridor / Mandal / Village</label>
+                <input type="text" name="corridor" required placeholder="e.g. Chevella Mandal, Malkapur" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Extent & Price -->
+          <div>
+            <div class="flex items-center gap-2 pb-2 border-b border-border-light mb-4">
+              <span class="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">2</span>
+              <h3 class="font-heading font-bold text-base text-primary" data-i18n="step2Title">Extent & Direct Asking Price</h3>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="text-xs font-semibold text-on-surface block mb-1">Total Extent</label>
+                <input type="number" step="0.01" name="extentValue" required placeholder="e.g. 4.5" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-on-surface block mb-1">Extent Unit</label>
+                <select name="extentUnit" required class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+                  <option value="Acres">Acres</option>
+                  <option value="Guntas">Guntas (TS / KA)</option>
+                  <option value="Cents">Cents (AP / TN / KL)</option>
+                  <option value="Sq.Yards">Sq. Yards (Gajalu)</option>
+                  <option value="Sq.Ft">Sq. Feet</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-on-surface block mb-1">Price per Unit</label>
+                <input type="text" name="pricePerUnit" required placeholder="e.g. 45 Lakhs" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Road & Water Infrastructure -->
+          <div>
+            <div class="flex items-center gap-2 pb-2 border-b border-border-light mb-4">
+              <span class="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">3</span>
+              <h3 class="font-heading font-bold text-base text-primary" data-i18n="step3Title">Road, Water & Infrastructure</h3>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="text-xs font-semibold text-on-surface block mb-1">Approach Road Access</label>
+                <select name="roadAccess" required class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+                  <option value="30ft Blacktop Panchayat Tar Road">30ft Panchayat Tar Road</option>
+                  <option value="40ft Wide Asphalt Road">40ft Wide Asphalt Road</option>
+                  <option value="60ft Direct Highway Service Road">60ft Highway Service Road</option>
+                  <option value="20ft Metal Gravel Road">20ft Metal Gravel Road</option>
+                  <option value="Cart Track with Registered Right of Way">Registered Right of Way</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-on-surface block mb-1">Water Source Available</label>
+                <select name="waterSource" required class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+                  <option value="2 Deep Borewells (Continuous Yield)">2 Deep Borewells</option>
+                  <option value="1 High Yield Borewell + Open Well">1 Borewell + Open Well</option>
+                  <option value="Canal / River Irrigation Line">Canal / River Irrigation Line</option>
+                  <option value="Municipal / Industrial Pipeline">Municipal Pipeline</option>
+                  <option value="Groundwater Table Suitable for New Bore">Borewell Potential</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="text-xs font-semibold text-on-surface block mb-1">Land Photo Upload</label>
+                <input type="file" accept="image/*" onchange="app.handleImageUpload(this)" class="w-full px-3 py-2 rounded-xl bg-surface-container-low border border-border-light text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary-container file:text-white file:font-semibold">
+                <img id="listPhotoPreview" class="hidden mt-3 h-36 w-full object-cover rounded-xl border border-border-light">
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Direct Landowner Contact & Self-Declaration -->
+          <div>
+            <div class="flex items-center gap-2 pb-2 border-b border-border-light mb-4">
+              <span class="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">4</span>
+              <h3 class="font-heading font-bold text-base text-primary" data-i18n="step4Title">Landowner Contact & Declaration</h3>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="text-xs font-semibold text-on-surface block mb-1">Your Full Name (Title Holder)</label>
+                <input type="text" id="listOwnerName" name="ownerName" required placeholder="e.g. K. Ramakrishna Rao" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+              </div>
+
+              <div>
+                <label class="text-xs font-semibold text-on-surface block mb-1">Mobile Number (WhatsApp Enabled)</label>
+                <input type="tel" id="listOwnerPhone" name="ownerPhone" required placeholder="+91 98480 12345" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary">
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="text-xs font-semibold text-on-surface block mb-1">Detailed Land Notes</label>
+                <textarea name="description" rows="3" placeholder="Explain soil fertility, clear title history, survey boundary status, distance to highway, etc." class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm focus:outline-none focus:border-primary"></textarea>
+              </div>
+            </div>
+
+            <!-- Anti-Broker Legal Declaration -->
+            <div class="p-3.5 rounded-xl bg-surface-container text-xs text-on-surface-variant flex items-start gap-2.5 mt-4">
+              <input type="checkbox" required id="declareOwner" class="mt-0.5 rounded text-primary focus:ring-primary">
+              <label for="declareOwner" class="leading-relaxed">
+                <strong>Sole Direct Landowner Promise:</strong> I solemnly declare that I am the direct legal owner (or authorized family member) of this parcel. I am not an unauthorized broker or commission agent. Zero brokerage applies to this transaction.
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-2xl btn-primary-kinetic font-bold text-sm md:text-base flex items-center justify-center gap-2 shadow-lg">
+            <span class="material-symbols-outlined text-[20px]">publish</span>
+            <span data-i18n="publishBtn">Publish Direct Land Listing (100% Free)</span>
+          </button>
+        </form>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW: LANDOWNER & BUYER DASHBOARD          -->
+    <!-- ========================================== -->
+    <section id="view-dashboard" class="view-container hidden">
+      <div class="container mx-auto px-4 py-8">
+        
+        <!-- Dashboard Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border-light">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-primary-container text-white font-bold text-xs uppercase" id="dashRoleBadge">Landowner Mode</span>
+              <span class="text-xs text-on-surface-variant font-medium">0% Brokerage Dashboard</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-heading font-extrabold text-primary mt-1" data-i18n="dashTitle">Management Dashboard</h1>
+            <p class="text-xs md:text-sm text-on-surface-variant mt-0.5" data-i18n="dashSubtitle">Manage your direct land parcels, respond to buyer site visit inquiries, and track documents.</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button onclick="app.toggleUserRole()" class="px-3.5 py-2 rounded-xl border border-border-light bg-surface-container hover:bg-surface-container-high text-xs font-bold text-primary flex items-center gap-1.5 transition-colors">
+              <span class="material-symbols-outlined text-[16px]">swap_horiz</span>
+              <span id="dashRoleSwitchBtn">Switch to Buyer Mode</span>
+            </button>
+            <a href="#list-property" class="px-4 py-2 rounded-xl btn-primary-kinetic text-xs font-bold flex items-center gap-1.5 shadow-sm">
+              <span class="material-symbols-outlined text-[16px]">add_circle</span>
+              <span>+ List New Land</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          
+          <div class="p-4 rounded-2xl bg-white border border-border-light shadow-sm flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-primary-container/10 text-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[26px]">landscape</span>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block" data-i18n="dashMyListings">My Listings</span>
+              <span id="dashMetricListings" class="text-xl md:text-2xl font-heading font-extrabold text-primary">0</span>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-white border border-border-light shadow-sm flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[26px]">calendar_month</span>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block" data-i18n="dashVisits">Visit Inquiries</span>
+              <span id="dashMetricVisits" class="text-xl md:text-2xl font-heading font-extrabold text-secondary">0</span>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-white border border-border-light shadow-sm flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-700 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[26px]">verified</span>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block" data-i18n="dashGovtLedgers">Govt Ledgers</span>
+              <span class="text-xl md:text-2xl font-heading font-extrabold text-amber-700">100% Clear</span>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-white border border-border-light shadow-sm flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-700 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[26px]">savings</span>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block" data-i18n="dashBrokerageSaved">Brokerage Saved</span>
+              <span id="dashMetricSaved" class="text-xl md:text-2xl font-heading font-extrabold text-emerald-700">₹0 Fee</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Dashboard Sub-Tabs -->
+        <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-surface-container border border-border-light mt-8 overflow-x-auto">
+          <button id="dashTabListingsBtn" onclick="app.switchDashTab('listings')" class="py-2 px-4 rounded-xl bg-primary-container text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all shrink-0">
+            <span class="material-symbols-outlined text-[16px]">list_alt</span>
+            <span data-i18n="dashTabListings">My Land Listings</span>
+          </button>
+          <button id="dashTabVisitsBtn" onclick="app.switchDashTab('visits')" class="py-2 px-4 rounded-xl text-on-surface-variant hover:text-primary text-xs font-bold flex items-center gap-1.5 transition-all shrink-0">
+            <span class="material-symbols-outlined text-[16px]">groups</span>
+            <span data-i18n="dashTabVisits">Buyer Field Visits & Inquiries</span>
+            <span id="dashVisitsCountBadge" class="hidden px-1.5 py-0.2 rounded-full bg-secondary text-white text-[10px] font-bold">0</span>
+          </button>
+          <button id="dashTabBuyerVisitsBtn" onclick="app.switchDashTab('buyer-visits')" class="py-2 px-4 rounded-xl text-on-surface-variant hover:text-primary text-xs font-bold flex items-center gap-1.5 transition-all shrink-0">
+            <span class="material-symbols-outlined text-[16px]">event_available</span>
+            <span data-i18n="dashTabBuyerVisits">My Scheduled Inspections (Buyer)</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: My Land Listings Section -->
+        <div id="dashSectionListings" class="mt-6">
+          <div id="dashboardPropertiesContainer" class="flex flex-col gap-4">
+            <!-- Populated dynamically by app.renderDashboard() -->
+          </div>
+        </div>
+
+        <!-- Tab 2: Buyer Field Visits Section (Seller view) -->
+        <div id="dashSectionVisits" class="mt-6 hidden">
+          <div id="dashboardVisitsContainer" class="flex flex-col gap-4">
+            <!-- Populated dynamically by app.renderDashboard() -->
+          </div>
+        </div>
+
+        <!-- Tab 3: My Scheduled Inspections (Buyer view) -->
+        <div id="dashSectionBuyerVisits" class="mt-6 hidden">
+          <div id="dashboardBuyerVisitsContainer" class="flex flex-col gap-4">
+            <!-- Populated dynamically by app.renderDashboard() -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW: SAVED PROPERTIES                     -->
+    <!-- ========================================== -->
+    <section id="view-saved" class="view-container hidden">
+      <div class="container mx-auto px-4 py-8">
+        <div class="pb-6 border-b border-border-light flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-heading font-bold text-primary" data-i18n="savedTitle">Saved Land Parcels</h1>
+            <p class="text-xs md:text-sm text-on-surface-variant mt-0.5" data-i18n="savedSubtitle">Your bookmarked direct properties for quick review, owner contact, and field visits.</p>
+          </div>
+          <a href="#properties" class="px-4 py-2 rounded-xl btn-primary-kinetic text-xs font-bold">
+            <span data-i18n="viewAllLands">Explore More Lands</span>
+          </a>
+        </div>
+
+        <div id="savedPropertiesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          <!-- Populated by app.renderSavedProperties() -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW: ABOUT & VERIFICATION STANDARD        -->
+    <!-- ========================================== -->
+    <section id="view-about" class="view-container hidden">
+      <div class="container mx-auto px-4 py-12 max-w-4xl">
+        <div class="text-center mb-10">
+          <span class="text-xs font-bold text-secondary uppercase tracking-wider">Our Trust Charter</span>
+          <h1 class="text-3xl md:text-4xl font-heading font-extrabold text-primary mt-1">Why InSightLiker Real Land Exists</h1>
+          <p class="text-sm text-on-surface-variant mt-2 max-w-xl mx-auto">
+            Traditional land buying in South India is plagued by opaque middlemen, inflated commission markups, and uncertain boundary disputes. We eliminate every layer of mediation.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-6 rounded-2xl bg-white border border-border-light shadow-sm">
+            <h3 class="font-heading font-bold text-lg text-primary flex items-center gap-2">
+              <span class="material-symbols-outlined text-secondary">verified</span> Digital Land Portal Verification
+            </h3>
+            <p class="text-xs text-on-surface-variant mt-2 leading-relaxed">
+              Every parcel listed contains verified government survey references: Dharani digital passbook in Telangana, Bhoomi & Kaveri 2.0 in Karnataka, Meebhoomi 1B in Andhra Pradesh, and Patta Chitta in Tamil Nadu.
+            </p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-white border border-border-light shadow-sm">
+            <h3 class="font-heading font-bold text-lg text-primary flex items-center gap-2">
+              <span class="material-symbols-outlined text-secondary">handshake</span> Direct Owner-to-Buyer Dealings
+            </h3>
+            <p class="text-xs text-on-surface-variant mt-2 leading-relaxed">
+              Buyers talk directly with the registered Pattadar. There are zero agent fees, zero side-agreements, and zero brokerage percentages.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW: CONTACT & ANTI-BROKER HELPLINE       -->
+    <!-- ========================================== -->
+    <section id="view-contact" class="view-container hidden">
+      <div class="container mx-auto px-4 py-12 max-w-3xl">
+        <div class="p-8 rounded-3xl bg-white border border-border-light shadow-xl text-center">
+          <div class="w-16 h-16 rounded-full bg-secondary-container text-secondary flex items-center justify-center mx-auto mb-4">
+            <span class="material-symbols-outlined text-[32px]">support_agent</span>
+          </div>
+          <h1 class="text-2xl font-heading font-bold text-primary">InSightLiker Anti-Broker Hotline</h1>
+          <p class="text-xs md:text-sm text-on-surface-variant mt-1 max-w-md mx-auto">
+            Did anyone ask for 2% commission or claim to represent a farmer on our platform? Report it immediately.
+          </p>
+
+          <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="tel:+918000000000" class="w-full sm:w-auto py-3 px-6 rounded-xl btn-primary-kinetic text-xs md:text-sm font-bold flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">call</span>
+              <span>Call Hotline (Toll Free)</span>
+            </a>
+            <button onclick="app.openReportBroker()" class="w-full sm:w-auto py-3 px-6 rounded-xl btn-secondary-kinetic text-xs md:text-sm font-bold flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">report</span>
+              <span>File Online Broker Report</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="bg-primary text-white pt-12 pb-8 border-t border-white/10 mt-auto">
+    <div class="container mx-auto px-4 flex flex-col gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-tertiary-fixed text-[26px]">landscape</span>
+            <span class="font-heading font-extrabold text-lg">InSightLiker Real Land</span>
+          </div>
+          <p class="text-xs text-white/70 leading-relaxed">
+            South India's premier direct land and plot marketplace. Verified Pattadar records, zero brokerage, and direct telephone/WhatsApp communication.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-heading font-bold text-sm text-tertiary-fixed uppercase tracking-wider mb-3">States Covered</h4>
+          <ul class="flex flex-col gap-2 text-xs text-white/80">
+            <li><a href="#properties/state-Telangana" class="hover:text-tertiary-fixed">Telangana (Chevella, Vikarabad, Shadnagar)</a></li>
+            <li><a href="#properties/state-Karnataka" class="hover:text-tertiary-fixed">Karnataka (Sarjapur, Devanahalli, Kanakapura)</a></li>
+            <li><a href="#properties/state-Andhra Pradesh" class="hover:text-tertiary-fixed">Andhra Pradesh (Tada, Nellore, Chittoor)</a></li>
+            <li><a href="#properties/state-Tamil Nadu" class="hover:text-tertiary-fixed">Tamil Nadu (Coimbatore, Hosur, Chengalpattu)</a></li>
+            <li><a href="#properties/state-Kerala" class="hover:text-tertiary-fixed">Kerala (Wayanad, Idukki, Palakkad)</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-heading font-bold text-sm text-tertiary-fixed uppercase tracking-wider mb-3">Govt Portals</h4>
+          <ul class="flex flex-col gap-2 text-xs text-white/80">
+            <li><a href="https://dharani.telangana.gov.in" target="_blank" rel="noopener" class="hover:text-tertiary-fixed">Telangana Dharani Portal</a></li>
+            <li><a href="https://kaveri.karnataka.gov.in" target="_blank" rel="noopener" class="hover:text-tertiary-fixed">Karnataka Bhoomi & Kaveri 2.0</a></li>
+            <li><a href="https://meebhoomi.ap.gov.in" target="_blank" rel="noopener" class="hover:text-tertiary-fixed">AP Meebhoomi Ledger</a></li>
+            <li><a href="https://eservices.tn.gov.in" target="_blank" rel="noopener" class="hover:text-tertiary-fixed">Tamil Nadu Patta Chitta</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-heading font-bold text-sm text-tertiary-fixed uppercase tracking-wider mb-3">Trust & Transparency</h4>
+          <ul class="flex flex-col gap-2 text-xs text-white/80">
+            <li><button onclick="app.openUnitConverter()" class="hover:text-tertiary-fixed text-left">Land Area Unit Calculator</button></li>
+            <li><a href="#about" class="hover:text-tertiary-fixed">Zero Brokerage Policy</a></li>
+            <li><button onclick="app.openReportBroker()" class="hover:text-tertiary-fixed text-left">Report Unauthorized Agent</button></li>
+            <li><button onclick="app.openFirebaseConfigModal()" class="hover:text-tertiary-fixed text-left">Firebase Auth Setup & API Status</button></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-white/60 gap-3">
+        <span>© 2026 InSightLiker Real Land. All direct landowner records verified.</span>
+        <span>Dedicated to Indian Farmers, Landowners & Direct Investors.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================== -->
+  <!-- MODAL: FIREBASE AUTHENTICATION             -->
+  <!-- ========================================== -->
+  <div id="authModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="fixed inset-0 modal-backdrop-blur" onclick="app.closeModal('authModal')"></div>
+    <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-border-light p-6 md:p-8 z-10 animate-fadeIn max-h-[90vh] overflow-y-auto">
+      
+      <!-- Close Button -->
+      <button onclick="app.closeModal('authModal')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+
+      <!-- Auth Modal Header -->
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center mx-auto mb-3 shadow-md">
+          <span class="material-symbols-outlined text-[28px] text-tertiary-fixed">lock</span>
+        </div>
+        <h3 id="authModalTitle" data-i18n="authModalTitle" class="text-xl md:text-2xl font-heading font-extrabold text-primary">Sign In to InSightLiker</h3>
+        <p id="authModalSubtitle" data-i18n="authModalSubtitle" class="text-xs text-on-surface-variant mt-1">Direct Land Marketplace for South India</p>
+      </div>
+
+      <!-- Auth Mode Toggle Tabs (Sign In vs Create Account vs Mobile OTP) -->
+      <div class="flex p-1 rounded-xl bg-surface-container border border-border-light mb-5">
+        <button id="authTabSignIn" onclick="app.switchAuthTab('signin')" class="flex-1 py-2 rounded-lg bg-primary-container text-white font-bold text-xs shadow-sm transition-all">
+          <span data-i18n="authTabSignIn">Sign In</span>
+        </button>
+        <button id="authTabSignUp" onclick="app.switchAuthTab('signup')" class="flex-1 py-2 rounded-lg text-on-surface-variant font-bold text-xs hover:text-primary transition-all">
+          <span data-i18n="authTabSignUp">Register</span>
+        </button>
+        <button id="authTabPhone" onclick="app.switchAuthTab('phone')" class="flex-1 py-2 rounded-lg text-on-surface-variant font-bold text-xs hover:text-primary transition-all flex items-center justify-center gap-1">
+          <span class="material-symbols-outlined text-[15px]">smartphone</span>
+          <span data-i18n="authTabPhone">Mobile OTP</span>
+        </button>
+      </div>
+
+      <!-- Role Selection (Shown prominently on Sign Up or Role Switch) -->
+      <div id="authRoleSection" class="mb-5">
+        <label class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-2">Select Your Role</label>
+        <div class="grid grid-cols-2 gap-2">
+          
+          <label class="cursor-pointer">
+            <input type="radio" name="authRole" value="buyer" checked class="peer sr-only">
+            <div class="p-3 rounded-xl border border-border-light peer-checked:border-primary peer-checked:bg-surface-container-low transition-all flex flex-col items-center text-center gap-1">
+              <span class="material-symbols-outlined text-[22px] text-primary">person_search</span>
+              <span class="text-xs font-bold text-on-surface">Land Buyer</span>
+              <span class="text-[10px] text-on-surface-variant">Explore & Visit</span>
+            </div>
+          </label>
+
+          <label class="cursor-pointer">
+            <input type="radio" name="authRole" value="seller" class="peer sr-only">
+            <div class="p-3 rounded-xl border border-border-light peer-checked:border-secondary peer-checked:bg-[#fcf8ee] transition-all flex flex-col items-center text-center gap-1">
+              <span class="material-symbols-outlined text-[22px] text-secondary">agriculture</span>
+              <span class="text-xs font-bold text-on-surface">Landowner</span>
+              <span class="text-[10px] text-on-surface-variant">List Lands Free</span>
+            </div>
+          </label>
+
+        </div>
+      </div>
+
+      <!-- Google Sign-In (One-Click) -->
+      <button onclick="app.handleGoogleAuth()" class="w-full py-2.5 px-4 rounded-xl border border-border-light hover:bg-surface-container flex items-center justify-center gap-2.5 text-xs font-bold text-on-surface transition-colors shadow-sm mb-4">
+        <svg class="w-4 h-4" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span data-i18n="authGoogleBtn">Continue with Google</span>
+      </button>
+
+      <div class="flex items-center gap-2 my-4">
+        <div class="flex-1 h-px bg-border-light"></div>
+        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">or with Email</span>
+        <div class="flex-1 h-px bg-border-light"></div>
+      </div>
+
+      <!-- Auth Form (Email / Password) -->
+      <form id="authForm" onsubmit="event.preventDefault(); app.handleAuthSubmit(this)" class="flex flex-col gap-3">
+        
+        <div id="authNameField" class="hidden">
+          <label class="text-xs font-semibold text-on-surface block mb-1">Your Full Name</label>
+          <input type="text" id="authInputName" placeholder="e.g. Ramesh Kumar" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-xs font-semibold focus:outline-none focus:border-primary">
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-on-surface block mb-1">Email Address</label>
+          <input type="email" id="authInputEmail" required placeholder="name@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-xs font-semibold focus:outline-none focus:border-primary">
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-on-surface block mb-1">Password</label>
+          <input type="password" id="authInputPassword" required placeholder="Minimum 6 characters" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-xs font-semibold focus:outline-none focus:border-primary">
+        </div>
+
+        <!-- Inline Error Banner -->
+        <div id="authErrorMessage" class="hidden p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium"></div>
+
+        <button type="submit" id="authSubmitBtn" class="w-full mt-2 py-3 rounded-xl btn-primary-kinetic text-xs md:text-sm font-bold flex items-center justify-center gap-1.5 shadow-md">
+          <span class="material-symbols-outlined text-[18px]">login</span>
+          <span id="authSubmitText">Sign In</span>
+        </button>
+      </form>
+
+      <!-- Phone OTP Form Container (Shown when Mobile OTP tab is active) -->
+      <div id="authPhoneContainer" class="hidden flex flex-col gap-3">
+        <div id="recaptchaContainer"></div>
+        <div id="phoneStepNumber">
+          <label class="text-xs font-semibold text-on-surface block mb-1">Mobile Number (India +91)</label>
+          <div class="flex gap-2">
+            <span class="px-3 py-2.5 rounded-xl bg-surface-container border border-border-light text-xs font-bold text-primary flex items-center">+91</span>
+            <input type="tel" id="authInputPhone" placeholder="98480 12345" class="flex-1 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-xs font-semibold focus:outline-none focus:border-primary">
+          </div>
+          <button type="button" onclick="app.handleSendPhoneOtp()" class="w-full mt-3 py-2.5 rounded-xl btn-primary-kinetic text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">send</span>
+            <span>Send 6-Digit OTP</span>
+          </button>
+        </div>
+
+        <div id="phoneStepOtp" class="hidden flex flex-col gap-2">
+          <div class="p-2 rounded-xl bg-surface-container-low border border-border-light text-center">
+            <span class="text-[11px] text-on-surface-variant">SMS code sent to: <strong id="phoneTargetDisplay">+91 •••••</strong></span>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-on-surface block mb-1">Enter 6-Digit OTP Code</label>
+            <input type="text" id="authInputOtp" maxlength="6" placeholder="e.g. 123456" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm font-bold tracking-widest text-center text-primary focus:outline-none focus:border-primary">
+            <span class="text-[10px] text-on-surface-variant block mt-1 text-center font-medium">Demo sandbox code: <strong>123456</strong></span>
+          </div>
+          <button type="button" onclick="app.handleVerifyPhoneOtp()" class="w-full mt-1 py-2.5 rounded-xl btn-primary-kinetic text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">check_circle</span>
+            <span>Verify & Sign In</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Firebase Demo Status / Keys Modal Link -->
+      <div class="mt-4 pt-3 border-t border-border-light text-center">
+        <button onclick="app.openFirebaseConfigModal()" class="text-[11px] text-on-surface-variant hover:text-primary font-medium flex items-center justify-center gap-1 mx-auto">
+          <span class="material-symbols-outlined text-[14px]">tune</span>
+          <span>Configure live Firebase project keys</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: FIREBASE CONFIGURATION DIALOG       -->
+  <!-- ========================================== -->
+  <div id="firebaseConfigModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="fixed inset-0 modal-backdrop-blur" onclick="app.closeModal('firebaseConfigModal')"></div>
+    <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-border-light p-6 md:p-8 z-10 animate-fadeIn max-h-[90vh] overflow-y-auto">
+      
+      <button onclick="app.closeModal('firebaseConfigModal')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-[24px]">local_fire_department</span>
+        </div>
+        <div>
+          <h3 class="font-heading font-bold text-lg text-primary">Firebase Project Settings</h3>
+          <p class="text-xs text-on-surface-variant">Connect your live Google Firebase credentials anytime</p>
+        </div>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-surface-container-low border border-border-light text-xs text-on-surface-variant mb-4">
+        <p><strong>Status:</strong> <span id="fbLiveStatusBadge" class="font-bold text-primary">Demo / Local Auth Active</span></p>
+        <p class="mt-1 text-[11px]">You can paste your Firebase web config from Firebase Console > Project Settings > Your Apps to connect directly to your live database.</p>
+      </div>
+
+      <form onsubmit="event.preventDefault(); app.handleSaveFirebaseConfig(this)" class="flex flex-col gap-3">
+        <div>
+          <label class="text-xs font-semibold text-on-surface block mb-1">API Key</label>
+          <input type="text" id="fbCfgApiKey" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-lg bg-surface-container-low border border-border-light text-xs font-mono">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-on-surface block mb-1">Auth Domain</label>
+          <input type="text" id="fbCfgAuthDomain" placeholder="your-project.firebaseapp.com" class="w-full px-3 py-2 rounded-lg bg-surface-container-low border border-border-light text-xs font-mono">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-on-surface block mb-1">Project ID</label>
+            <input type="text" id="fbCfgProjectId" placeholder="your-project-id" class="w-full px-3 py-2 rounded-lg bg-surface-container-low border border-border-light text-xs font-mono">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-on-surface block mb-1">App ID</label>
+            <input type="text" id="fbCfgAppId" placeholder="1:12345:web:abcdef" class="w-full px-3 py-2 rounded-lg bg-surface-container-low border border-border-light text-xs font-mono">
+          </div>
+        </div>
+        <button type="submit" class="mt-2 py-2.5 rounded-xl btn-primary-kinetic text-xs font-bold">
+          Save Firebase Configuration
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: PROPERTY DETAIL MODAL               -->
+  <!-- ========================================== -->
+  <div id="propertyDetailModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 md:p-6">
+    <div class="fixed inset-0 modal-backdrop-blur" onclick="app.closeModal('propertyDetailModal')"></div>
+    <div class="relative w-full max-w-5xl bg-surface-container-lowest rounded-3xl shadow-2xl border border-border-light p-5 md:p-8 z-10 animate-fadeIn max-h-[92vh] overflow-y-auto">
+      <div id="propertyDetailContent">
+        <!-- Injected dynamically by app.openPropertyDetail(id) -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: OWNER CONTACT / SITE VISIT MODAL    -->
+  <!-- ========================================== -->
+  <div id="ownerContactModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="fixed inset-0 modal-backdrop-blur" onclick="app.closeModal('ownerContactModal')"></div>
+    <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-border-light p-6 z-10 animate-fadeIn max-h-[90vh] overflow-y-auto">
+      <button onclick="app.closeModal('ownerContactModal')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+      <div id="ownerContactContent">
+        <!-- Injected dynamically by app.revealOwnerContact or app.openSiteVisitScheduler -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: REPORT UNAUTHORIZED BROKER          -->
+  <!-- ========================================== -->
+  <div id="reportBrokerModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="fixed inset-0 modal-backdrop-blur" onclick="app.closeModal('reportBrokerModal')"></div>
+    <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-border-light p-6 z-10 animate-fadeIn">
+      <button onclick="app.closeModal('reportBrokerModal')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+      <div id="reportBrokerContent">
+        <!-- Injected dynamically by app.openReportBroker -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: SOUTH INDIAN LAND UNIT CONVERTER    -->
+  <!-- ========================================== -->
+  <div id="unitConverterModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="fixed inset-0 modal-backdrop-blur" onclick="app.closeModal('unitConverterModal')"></div>
+    <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-border-light p-6 md:p-8 z-10 animate-fadeIn">
+      
+      <button onclick="app.closeModal('unitConverterModal')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-primary-container text-white flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-[22px] text-tertiary-fixed">calculate</span>
+        </div>
+        <div>
+          <h3 class="font-heading font-bold text-lg text-primary" data-i18n="calcTitle">South Indian Land Area Calculator</h3>
+          <p class="text-xs text-on-surface-variant" data-i18n="calcSubtitle">Instant conversion across Acres, Guntas, Cents, Grounds & Sq.Ft</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mt-4 text-xs font-semibold">
+        <div>
+          <label class="block text-[11px] text-on-surface-variant uppercase mb-1">Acres (43,560 sq.ft)</label>
+          <input type="number" id="conv-acre" step="any" oninput="app.convertUnits('acre', this.value)" placeholder="1" class="w-full px-3 py-2 rounded-xl bg-surface-container-low border border-border-light text-sm font-bold text-primary focus:outline-none focus:border-primary">
+        </div>
+        <div>
+          <label class="block text-[11px] text-on-surface-variant uppercase mb-1">Guntas (TS / KA - 1089 sq.ft)</label>
+          <input type="number" id="conv-gunta" step="any" oninput="app.convertUnits('gunta', this.value)" placeholder="40" class="w-full px-3 py-2 rounded-xl bg-surface-container-low border border-border-light text-sm font-bold text-primary focus:outline-none focus:border-primary">
+        </div>
+        <div>
+          <label class="block text-[11px] text-on-surface-variant uppercase mb-1">Cents (AP / TN / KL - 435.6 sq.ft)</label>
+          <input type="number" id="conv-cent" step="any" oninput="app.convertUnits('cent', this.value)" placeholder="100" class="w-full px-3 py-2 rounded-xl bg-surface-container-low border border-border-light text-sm font-bold text-primary focus:outline-none focus:border-primary">
+        </div>
+        <div>
+          <label class="block text-[11px] text-on-surface-variant uppercase mb-1">Grounds (Chennai - 2400 sq.ft)</label>
+          <input type="number" id="conv-ground" step="any" oninput="app.convertUnits('ground', this.value)" placeholder="18.15" class="w-full px-3 py-2 rounded-xl bg-surface-container-low border border-border-light text-sm font-bold text-primary focus:outline-none focus:border-primary">
+        </div>
+        <div>
+          <label class="block text-[11px] text-on-surface-variant uppercase mb-1">Sq. Yards (Gajalu - 9 sq.ft)</label>
+          <input type="number" id="conv-sqyd" step="any" oninput="app.convertUnits('sqyd', this.value)" placeholder="4840" class="w-full px-3 py-2 rounded-xl bg-surface-container-low border border-border-light text-sm font-bold text-primary focus:outline-none focus:border-primary">
+        </div>
+        <div>
+          <label class="block text-[11px] text-on-surface-variant uppercase mb-1">Total Square Feet</label>
+          <input type="number" id="conv-sqft" step="any" oninput="app.convertUnits('sqft', this.value)" placeholder="43560" class="w-full px-3 py-2 rounded-xl bg-surface-container-low border border-border-light text-sm font-bold text-primary focus:outline-none focus:border-primary">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- FLOATING TOAST NOTIFICATION                -->
+  <!-- ========================================== -->
+  <div id="globalToast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl bg-primary text-white shadow-2xl border border-white/20 transition-all duration-300 opacity-0 pointer-events-none translate-y-4 max-w-sm">
+    <span class="material-symbols-outlined text-tertiary-fixed text-[20px] shrink-0">info</span>
+    <span id="globalToastMessage" class="text-xs md:text-sm font-medium">Notification message</span>
+  </div>
+
+  <!-- Leaflet JS CDN for Interactive Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Firebase Auth Configuration & Service -->
+  <script src="firebase-config.js"></script>
+
+  <!-- Main Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
+
