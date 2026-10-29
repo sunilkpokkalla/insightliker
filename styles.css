@@ -70,11 +70,48 @@ h1, h2, h3, h4, .font-heading {
 
 /* Glassmorphism Navigation */
 .glass-nav {
-  background: rgba(240, 253, 243, 0.88);
+  background: rgba(240, 253, 243, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(192, 201, 194, 0.4);
 }
+
+.header-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  height: 2.25rem;
+  padding: 0 0.7rem;
+  border-radius: 0.6rem;
+  font-size: 0.875rem;
+  line-height: 1;
+  font-weight: 500;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.header-link:hover {
+  background: #e4f1e7;
+  color: #003625;
+}
+[data-lang].is-lang-active {
+  background: #134e39;
+  color: #ffffff;
+}
+.header-chip {
+  align-items: center;
+  gap: 0.35rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  background: #e4f1e7;
+  border: 1px solid #e2e8e4;
+  white-space: nowrap;
+}
+html[lang="te"] body { font-family: "Noto Sans Telugu", Inter, sans-serif; }
+html[lang="kn"] body { font-family: "Noto Sans Kannada", Inter, sans-serif; }
+html[lang="ta"] body { font-family: "Noto Sans Tamil", Inter, sans-serif; }
+html[lang="ml"] body { font-family: "Noto Sans Malayalam", Inter, sans-serif; }
 
 /* Gold Verified Trust Seal */
 .verified-seal-badge {

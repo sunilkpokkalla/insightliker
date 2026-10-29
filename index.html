@@ -10,7 +10,7 @@
   <!-- Google Fonts: Plus Jakarta Sans & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Noto+Sans+Kannada:wght@500;700&family=Noto+Sans+Malayalam:wght@500;700&family=Noto+Sans+Tamil:wght@500;700&family=Noto+Sans+Telugu:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- Google Material Symbols Outlined -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -73,72 +73,68 @@
   </div>
 
   <!-- Main Navigation Bar -->
-  <header class="sticky top-0 z-40 glass-nav transition-all duration-300">
-    <div class="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-3">
+  <header class="sticky top-0 z-40 glass-nav">
+    <div class="mx-auto max-w-[1440px] px-4 h-16 flex items-center gap-3">
       
       <!-- Brand Logo -->
       <a href="#home" class="flex items-center gap-2.5 shrink-0 group">
-        <div class="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary-container text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-          <span class="material-symbols-outlined text-[24px] text-tertiary-fixed">landscape</span>
+        <div class="w-10 h-10 rounded-xl bg-primary-container text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+          <span class="material-symbols-outlined text-[22px] text-tertiary-fixed">landscape</span>
         </div>
-        <div class="flex flex-col">
-          <span class="font-heading font-extrabold text-lg md:text-xl text-primary tracking-tight leading-none flex items-center gap-1">
-            InSightLiker <span class="text-secondary font-bold text-xs uppercase px-1.5 py-0.5 rounded bg-surface-container border border-secondary-container">Real Land</span>
+        <div class="flex flex-col justify-center leading-none">
+          <span class="font-heading font-extrabold text-base text-primary tracking-tight flex items-center gap-1.5">
+            InSightLiker <span class="text-secondary font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-surface-container border border-secondary-container leading-none">Real Land</span>
           </span>
-          <span class="text-[10px] md:text-[11px] font-semibold text-secondary mt-0.5">South India Direct Marketplace</span>
+          <span class="text-[10px] font-semibold text-secondary mt-1 leading-none">South India Direct Marketplace</span>
         </div>
       </a>
 
-      <!-- State Quick Filter in Header -->
-      <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container border border-border-light text-xs font-medium text-on-surface">
-        <span class="material-symbols-outlined text-[16px] text-primary">pin_drop</span>
-        <select id="headerStateSelect" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer pr-1">
-          <option value="all">All South India</option>
-          <option value="Telangana">Telangana (Dharani)</option>
-          <option value="Karnataka">Karnataka (Bhoomi / Kaveri)</option>
-          <option value="Andhra Pradesh">Andhra Pradesh (Meebhoomi)</option>
-          <option value="Tamil Nadu">Tamil Nadu (Patta Chitta)</option>
-          <option value="Kerala">Kerala (Re-Survey)</option>
-        </select>
-      </div>
-
-      <!-- Language Quick Switcher in Header -->
-      <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container border border-border-light text-xs font-semibold text-primary">
-        <span class="material-symbols-outlined text-[16px] text-primary">translate</span>
-        <select id="headerLangSelect" onchange="app.setLanguage(this.value)" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer pr-1">
-          <option value="en">English (EN)</option>
-          <option value="te">తెలుగు (Telugu)</option>
-          <option value="kn">ಕನ್ನಡ (Kannada)</option>
-          <option value="ta">தமிழ் (Tamil)</option>
-          <option value="ml">മലയാളം (Malayalam)</option>
-        </select>
-      </div>
-
       <!-- Navigation Links -->
-      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-        <a href="#home" data-nav-target="home" class="hover:text-primary transition-colors py-1"><span data-i18n="navHome">Home</span></a>
-        <a href="#properties" data-nav-target="properties" class="hover:text-primary transition-colors py-1 flex items-center gap-1">
-          <span data-i18n="navExplore">Explore Lands</span>
-          <span class="w-2 h-2 rounded-full bg-secondary"></span>
+      <nav class="hidden lg:flex items-center justify-center gap-0.5 flex-1 min-w-0 h-full">
+        <a href="#home" data-nav-target="home" class="header-link"><span data-i18n="navHome">Home</span></a>
+        <a href="#properties" data-nav-target="properties" class="header-link">
+          <span data-i18n="navExplore">Explore</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-secondary shrink-0"></span>
         </a>
-        <a href="#list-property" data-nav-target="list-property" class="hover:text-primary transition-colors py-1 flex items-center gap-1 text-secondary font-semibold">
-          <span class="material-symbols-outlined text-[18px]">add_circle</span>
-          <span data-i18n="navListFree">List Free</span>
+        <a href="#list-property" data-nav-target="list-property" class="header-link text-secondary font-semibold">
+          <span class="material-symbols-outlined text-[18px] leading-none">add_circle</span>
+          <span data-i18n="navListFree">List free</span>
         </a>
-        <a href="#dashboard" data-nav-target="dashboard" class="hover:text-primary transition-colors py-1 flex items-center gap-1">
-          <span data-i18n="navDashboard">Dashboard</span>
-        </a>
-        <a href="#saved" data-nav-target="saved" class="hover:text-primary transition-colors py-1 flex items-center gap-1 relative">
+        <a href="#dashboard" data-nav-target="dashboard" class="header-link"><span data-i18n="navDashboard">Dashboard</span></a>
+        <a href="#saved" data-nav-target="saved" class="header-link">
           <span data-i18n="navSaved">Saved</span>
-          <span id="savedNavBadge" class="hidden px-1.5 py-0.2 rounded-full bg-secondary text-white text-[10px] font-bold">0</span>
+          <span id="savedNavBadge" class="hidden px-1.5 rounded-full bg-secondary text-white text-[10px] font-bold leading-4">0</span>
         </a>
       </nav>
 
       <!-- Right Header Actions (Auth & Controls) -->
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-2 shrink-0 ml-auto h-full">
+
+        <div class="hidden xl:flex header-chip">
+          <span class="material-symbols-outlined text-[16px] text-primary">pin_drop</span>
+          <select id="headerStateSelect" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer max-w-[9.5rem]">
+            <option value="all">All South India</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Kerala">Kerala</option>
+          </select>
+        </div>
+
+        <div class="hidden sm:flex header-chip">
+          <span class="material-symbols-outlined text-[16px] text-primary">translate</span>
+          <select id="headerLangSelect" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer">
+            <option value="en">English</option>
+            <option value="te">తెలుగు</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="ta">தமிழ்</option>
+            <option value="ml">മലയാളം</option>
+          </select>
+        </div>
         
         <!-- Unit Converter Button -->
-        <button id="unitConverterBtn" class="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border-light bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-primary transition-colors" title="Convert Acres, Guntas, Cents, Sq.Yards">
+        <button id="unitConverterBtn" class="hidden md:inline-flex items-center gap-1 h-9 px-3 rounded-full border border-border-light bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-primary whitespace-nowrap" title="Convert Acres, Guntas, Cents, Sq.Yards">
           <span class="material-symbols-outlined text-[16px]">calculate</span>
           <span data-i18n="navConverter">Converter</span>
         </button>
@@ -155,7 +151,7 @@
 
           <!-- State 2: Authenticated User Pill (Hidden by default) -->
           <div id="authNavUser" class="hidden relative">
-            <button onclick="app.toggleUserMenu()" class="flex items-center gap-2 py-1.5 px-3 rounded-full bg-surface-container-high border border-border-light hover:border-primary transition-all">
+            <button onclick="app.toggleUserMenu()" class="flex items-center gap-2 h-9 px-2.5 rounded-full bg-surface-container-high border border-border-light hover:border-primary whitespace-nowrap">
               <div id="authUserAvatar" class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-sm overflow-hidden">
                 U
               </div>
@@ -171,8 +167,7 @@
               <div class="px-4 py-2 border-b border-border-light">
                 <p id="dropdownUserEmail" class="text-xs text-on-surface-variant truncate">user@example.com</p>
                 <div class="mt-1 flex items-center justify-between">
-                  <span id="dropdownRoleLabel" class="text-[11px] font-bold text-primary px-2 py-0.5 rounded-full bg-surface-container">Verified Buyer</span>
-                  <button onclick="app.toggleUserRole()" class="text-[10px] text-secondary font-bold hover:underline">Switch Role</button>
+                  <span id="dropdownRoleLabel" class="text-[11px] font-bold text-primary px-2 py-0.5 rounded-full bg-surface-container">Buyer</span>
                 </div>
               </div>
 
@@ -207,7 +202,7 @@
         </div>
 
         <!-- Mobile Drawer Hamburger Toggle -->
-        <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" title="Toggle Navigation">
+        <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" title="Toggle Navigation">
           <span class="material-symbols-outlined text-[24px]">menu</span>
         </button>
       </div>
@@ -588,6 +583,33 @@
           </p>
         </div>
 
+        <div id="listGuestBlock">
+        <div class="p-8 rounded-3xl bg-white border border-border-light shadow-sm text-center flex flex-col items-center gap-3">
+          <span class="material-symbols-outlined text-[40px] text-primary">agriculture</span>
+          <h2 class="font-heading font-extrabold text-xl text-primary">Landowner sign-in required</h2>
+          <p class="text-sm text-on-surface-variant max-w-md">Buyers can browse every published parcel. Publishing a listing is limited to a landowner account, and that role is fixed when you register.</p>
+          <div class="flex flex-wrap items-center justify-center gap-2 mt-2">
+            <button onclick="app.openAuthModal('signin', 'seller')" class="px-4 py-2.5 rounded-xl btn-primary-kinetic text-xs font-bold">Sign in as landowner</button>
+            <button onclick="app.openAuthModal('signup', 'seller')" class="px-4 py-2.5 rounded-xl border border-border-light bg-surface-container text-xs font-bold text-primary">Create landowner account</button>
+            <a href="#properties" class="px-4 py-2.5 rounded-xl text-xs font-bold text-secondary">Browse lands instead</a>
+          </div>
+        </div>
+        </div>
+
+        <div id="listBuyerBlock" class="hidden">
+        <div class="p-8 rounded-3xl bg-white border border-border-light shadow-sm text-center flex flex-col items-center gap-3">
+          <span class="material-symbols-outlined text-[40px] text-primary">person_search</span>
+          <h2 class="font-heading font-extrabold text-xl text-primary">This account is a buyer</h2>
+          <p class="text-sm text-on-surface-variant max-w-md">You can view lands, save parcels, and request field visits. Listing land needs a separate landowner account.</p>
+          <div class="flex flex-wrap items-center justify-center gap-2 mt-2">
+            <a href="#properties" class="px-4 py-2.5 rounded-xl btn-primary-kinetic text-xs font-bold">View properties</a>
+            <a href="#dashboard" class="px-4 py-2.5 rounded-xl border border-border-light bg-surface-container text-xs font-bold text-primary">Buyer dashboard</a>
+          </div>
+        </div>
+        </div>
+
+        <div id="listSellerWorkspace" class="hidden">
+
         <!-- Authenticated Landowner Status Banner -->
         <div id="listAuthNotice" class="p-4 rounded-2xl bg-surface-container border border-border-light mb-6 flex items-center justify-between gap-3">
           <div class="flex items-center gap-3">
@@ -759,6 +781,7 @@
             <span data-i18n="publishBtn">Publish Direct Land Listing (100% Free)</span>
           </button>
         </form>
+        </div>
 
       </div>
     </section>
@@ -767,7 +790,26 @@
     <!-- VIEW: LANDOWNER & BUYER DASHBOARD          -->
     <!-- ========================================== -->
     <section id="view-dashboard" class="view-container hidden">
-      <div class="container mx-auto px-4 py-8">
+      <div id="dashboardGate" class="container mx-auto px-4 py-16 max-w-3xl">
+        <div class="text-center mb-8">
+          <h1 class="text-2xl md:text-4xl font-heading font-extrabold text-primary">Choose how you use InSightLiker</h1>
+          <p class="text-sm text-on-surface-variant mt-2">Buyers get a dashboard to view lands and track visits. Landowners get a dashboard to publish and manage listings.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button onclick="app.openAuthModal('signin', 'buyer')" class="p-6 rounded-3xl bg-white border border-border-light shadow-sm text-left hover:border-primary transition-colors">
+            <span class="material-symbols-outlined text-[32px] text-primary">person_search</span>
+            <h2 class="font-heading font-bold text-lg text-primary mt-3">Buyer dashboard</h2>
+            <p class="text-xs text-on-surface-variant mt-1">View published lands, save parcels, and request field visits.</p>
+          </button>
+          <button onclick="app.openAuthModal('signin', 'seller')" class="p-6 rounded-3xl bg-white border border-border-light shadow-sm text-left hover:border-secondary transition-colors">
+            <span class="material-symbols-outlined text-[32px] text-secondary">agriculture</span>
+            <h2 class="font-heading font-bold text-lg text-primary mt-3">Landowner dashboard</h2>
+            <p class="text-xs text-on-surface-variant mt-1">List property for free and respond to buyer visit requests.</p>
+          </button>
+        </div>
+      </div>
+
+      <div id="dashboardShell" class="container mx-auto px-4 py-8 hidden">
         
         <!-- Dashboard Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border-light">
@@ -776,18 +818,18 @@
               <span class="px-2.5 py-0.5 rounded-full bg-primary-container text-white font-bold text-xs uppercase" id="dashRoleBadge">Landowner Mode</span>
               <span class="text-xs text-on-surface-variant font-medium">0% Brokerage Dashboard</span>
             </div>
-            <h1 class="text-2xl md:text-3xl font-heading font-extrabold text-primary mt-1" data-i18n="dashTitle">Management Dashboard</h1>
-            <p class="text-xs md:text-sm text-on-surface-variant mt-0.5" data-i18n="dashSubtitle">Manage your direct land parcels, respond to buyer site visit inquiries, and track documents.</p>
+            <h1 id="dashTitle" class="text-2xl md:text-3xl font-heading font-extrabold text-primary mt-1">Dashboard</h1>
+            <p id="dashSubtitle" class="text-xs md:text-sm text-on-surface-variant mt-0.5">Your account home.</p>
           </div>
 
           <div class="flex items-center gap-3">
-            <button onclick="app.toggleUserRole()" class="px-3.5 py-2 rounded-xl border border-border-light bg-surface-container hover:bg-surface-container-high text-xs font-bold text-primary flex items-center gap-1.5 transition-colors">
-              <span class="material-symbols-outlined text-[16px]">swap_horiz</span>
-              <span id="dashRoleSwitchBtn">Switch to Buyer Mode</span>
-            </button>
-            <a href="#list-property" class="px-4 py-2 rounded-xl btn-primary-kinetic text-xs font-bold flex items-center gap-1.5 shadow-sm">
+            <a href="#properties" class="px-3.5 py-2 rounded-xl border border-border-light bg-surface-container hover:bg-surface-container-high text-xs font-bold text-primary flex items-center gap-1.5 transition-colors">
+              <span class="material-symbols-outlined text-[16px]">travel_explore</span>
+              <span>View properties</span>
+            </a>
+            <a id="dashListNewBtn" href="#list-property" class="hidden px-4 py-2 rounded-xl btn-primary-kinetic text-xs font-bold items-center gap-1.5 shadow-sm">
               <span class="material-symbols-outlined text-[16px]">add_circle</span>
-              <span>+ List New Land</span>
+              <span>List new land</span>
             </a>
           </div>
         </div>
@@ -800,7 +842,7 @@
               <span class="material-symbols-outlined text-[26px]">landscape</span>
             </div>
             <div>
-              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block" data-i18n="dashMyListings">My Listings</span>
+              <span id="dashMetricLabelListings" class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">My Listings</span>
               <span id="dashMetricListings" class="text-xl md:text-2xl font-heading font-extrabold text-primary">0</span>
             </div>
           </div>
@@ -810,7 +852,7 @@
               <span class="material-symbols-outlined text-[26px]">calendar_month</span>
             </div>
             <div>
-              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block" data-i18n="dashVisits">Visit Inquiries</span>
+              <span id="dashMetricLabelVisits" class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Visit Inquiries</span>
               <span id="dashMetricVisits" class="text-xl md:text-2xl font-heading font-extrabold text-secondary">0</span>
             </div>
           </div>
@@ -839,19 +881,27 @@
 
         <!-- Dashboard Sub-Tabs -->
         <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-surface-container border border-border-light mt-8 overflow-x-auto">
-          <button id="dashTabListingsBtn" onclick="app.switchDashTab('listings')" class="py-2 px-4 rounded-xl bg-primary-container text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all shrink-0">
+          <button id="dashTabListingsBtn" onclick="app.switchDashTab('listings')" class="hidden py-2 px-4 rounded-xl bg-primary-container text-white text-xs font-bold items-center gap-1.5 shadow-sm transition-all shrink-0">
             <span class="material-symbols-outlined text-[16px]">list_alt</span>
-            <span data-i18n="dashTabListings">My Land Listings</span>
+            <span>My land listings</span>
           </button>
-          <button id="dashTabVisitsBtn" onclick="app.switchDashTab('visits')" class="py-2 px-4 rounded-xl text-on-surface-variant hover:text-primary text-xs font-bold flex items-center gap-1.5 transition-all shrink-0">
+          <button id="dashTabVisitsBtn" onclick="app.switchDashTab('visits')" class="hidden py-2 px-4 rounded-xl text-on-surface-variant hover:text-primary text-xs font-bold items-center gap-1.5 transition-all shrink-0">
             <span class="material-symbols-outlined text-[16px]">groups</span>
-            <span data-i18n="dashTabVisits">Buyer Field Visits & Inquiries</span>
+            <span>Buyer visit requests</span>
             <span id="dashVisitsCountBadge" class="hidden px-1.5 py-0.2 rounded-full bg-secondary text-white text-[10px] font-bold">0</span>
           </button>
-          <button id="dashTabBuyerVisitsBtn" onclick="app.switchDashTab('buyer-visits')" class="py-2 px-4 rounded-xl text-on-surface-variant hover:text-primary text-xs font-bold flex items-center gap-1.5 transition-all shrink-0">
-            <span class="material-symbols-outlined text-[16px]">event_available</span>
-            <span data-i18n="dashTabBuyerVisits">My Scheduled Inspections (Buyer)</span>
+          <button id="dashTabSavedBtn" onclick="app.switchDashTab('saved')" class="hidden py-2 px-4 rounded-xl text-on-surface-variant hover:text-primary text-xs font-bold items-center gap-1.5 transition-all shrink-0">
+            <span class="material-symbols-outlined text-[16px]">bookmark</span>
+            <span>Saved lands</span>
           </button>
+          <button id="dashTabBuyerVisitsBtn" onclick="app.switchDashTab('buyer-visits')" class="hidden py-2 px-4 rounded-xl text-on-surface-variant hover:text-primary text-xs font-bold items-center gap-1.5 transition-all shrink-0">
+            <span class="material-symbols-outlined text-[16px]">event_available</span>
+            <span>My visit requests</span>
+          </button>
+          <a id="dashTabBrowseBtn" href="#properties" class="hidden py-2 px-4 rounded-xl text-on-surface-variant hover:text-primary text-xs font-bold items-center gap-1.5 transition-all shrink-0">
+            <span class="material-symbols-outlined text-[16px]">travel_explore</span>
+            <span>Browse all lands</span>
+          </a>
         </div>
 
         <!-- Tab 1: My Land Listings Section -->
@@ -872,6 +922,11 @@
         <div id="dashSectionBuyerVisits" class="mt-6 hidden">
           <div id="dashboardBuyerVisitsContainer" class="flex flex-col gap-4">
             <!-- Populated dynamically by app.renderDashboard() -->
+          </div>
+        </div>
+
+        <div id="dashSectionSaved" class="mt-6 hidden">
+          <div id="dashboardSavedContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           </div>
         </div>
 
@@ -1048,7 +1103,7 @@
         <button id="authTabSignUp" onclick="app.switchAuthTab('signup')" class="flex-1 py-2 rounded-lg text-on-surface-variant font-bold text-xs hover:text-primary transition-all">
           <span data-i18n="authTabSignUp">Register</span>
         </button>
-        <button id="authTabPhone" onclick="app.switchAuthTab('phone')" class="flex-1 py-2 rounded-lg text-on-surface-variant font-bold text-xs hover:text-primary transition-all flex items-center justify-center gap-1">
+        <button id="authTabPhone" type="button" onclick="app.switchAuthTab('phone')" style="display:none" class="flex-1 py-2 rounded-lg text-on-surface-variant font-bold text-xs hover:text-primary transition-all items-center justify-center gap-1">
           <span class="material-symbols-outlined text-[15px]">smartphone</span>
           <span data-i18n="authTabPhone">Mobile OTP</span>
         </button>
@@ -1056,7 +1111,7 @@
 
       <!-- Role Selection (Shown prominently on Sign Up or Role Switch) -->
       <div id="authRoleSection" class="mb-5">
-        <label class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-2">Select Your Role</label>
+        <label class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-2">Account type (fixed after registration)</label>
         <div class="grid grid-cols-2 gap-2">
           
           <label class="cursor-pointer">
@@ -1080,8 +1135,13 @@
         </div>
       </div>
 
-      <!-- Google Sign-In (One-Click) -->
-      <button onclick="app.handleGoogleAuth()" class="w-full py-2.5 px-4 rounded-xl border border-border-light hover:bg-surface-container flex items-center justify-center gap-2.5 text-xs font-bold text-on-surface transition-colors shadow-sm mb-4">
+      <div class="grid grid-cols-2 gap-2 mb-4">
+        <button type="button" onclick="app.fillDemoAccount('buyer')" class="py-2 px-3 rounded-xl border border-border-light bg-surface-container-low text-[11px] font-bold text-primary">Use buyer demo</button>
+        <button type="button" onclick="app.fillDemoAccount('seller')" class="py-2 px-3 rounded-xl border border-border-light bg-surface-container-low text-[11px] font-bold text-secondary">Use landowner demo</button>
+      </div>
+
+      <!-- Google Sign-In (hidden until a live Firebase project is connected) -->
+      <button type="button" onclick="app.handleGoogleAuth()" style="display:none" class="w-full py-2.5 px-4 rounded-xl border border-border-light hover:bg-surface-container items-center justify-center gap-2.5 text-xs font-bold text-on-surface transition-colors shadow-sm mb-4">
         <svg class="w-4 h-4" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>

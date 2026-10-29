@@ -629,8 +629,8 @@ const TRANSLATIONS = {
     trustBanner: "100% Direct Owners Only • Zero Brokerage & Zero Middlemen Guarantee",
     calcLink: "Land Area Calculator",
     navHome: "Home",
-    navExplore: "Explore Lands",
-    navListFree: "List Free (0% Fee)",
+    navExplore: "Explore",
+    navListFree: "List free",
     navDashboard: "Dashboard",
     navSaved: "Saved",
     navConverter: "Converter",
@@ -707,11 +707,11 @@ const TRANSLATIONS = {
     trustBanner: "100% నేరుగా భూయజమానులే • జీరో బ్రోకరేజ్ & దళారులు లేరు",
     calcLink: "భూమి విస్తీర్ణ కాలిక్యులేటర్",
     navHome: "హోమ్",
-    navExplore: "భూములు అన్వేషించండి",
-    navListFree: "ఉచితంగా లిస్ట్ చేయండి",
+    navExplore: "భూములు",
+    navListFree: "లిస్ట్",
     navDashboard: "డాష్‌బోర్డ్",
-    navSaved: "సేవ్ చేసినవి",
-    navConverter: "విస్తీర్ణ కాలిక్యులేటర్",
+    navSaved: "సేవ్",
+    navConverter: "కాలిక్యులేటర్",
     navSignIn: "సైన్ ఇన్ / రిజిస్టర్",
     navSignOut: "లాగ్ అవుట్",
     heroTrustPill: "జీరో బ్రోకరేజ్ • 100% నేరుగా భూయజమానులు మాత్రమే",
@@ -785,8 +785,8 @@ const TRANSLATIONS = {
     trustBanner: "100% ನೇರ ಭೂ ಮಾಲೀಕರು ಮಾತ್ರ • ಶೂನ್ಯ ದಲ್ಲಾಳಿ & ಮಧ್ಯವರ್ತಿಗಳಿಲ್ಲ",
     calcLink: "ಭೂ ವಿಸ್ತೀರ್ಣ ಕ್ಯಾಲ್ಕುಲೇಟರ್",
     navHome: "ಮುಖಪುಟ",
-    navExplore: "ಜಮೀನು ಹುಡುಕಿ",
-    navListFree: "ಉಚಿತವಾಗಿ ಪ್ರಕಟಿಸಿ (0% ಶುಲ್ಕ)",
+    navExplore: "ಜಮೀನು",
+    navListFree: "ಪ್ರಕಟಿಸಿ",
     navDashboard: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     navSaved: "ಉಳಿಸಿದವು",
     navConverter: "ಕ್ಯಾಲ್ಕುಲೇಟರ್",
@@ -863,8 +863,8 @@ const TRANSLATIONS = {
     trustBanner: "100% நேரடி நில உரிமையாளர்கள் • பூஜ்ஜிய தரகு & இடைத்தரகர்கள் இல்லை",
     calcLink: "நில பரப்பளவு கால்குலேட்டர்",
     navHome: "முகப்பு",
-    navExplore: "நிலங்களை காண்க",
-    navListFree: "இலவசமாக பதிவிட (0% கட்டணம்)",
+    navExplore: "நிலங்கள்",
+    navListFree: "பதிவிடு",
     navDashboard: "டாஷ்போர்டு",
     navSaved: "சேமித்தவை",
     navConverter: "பரப்பளவு மாற்றி",
@@ -941,8 +941,8 @@ const TRANSLATIONS = {
     trustBanner: "100% നേരിട്ടുള്ള ഭൂവുടമകൾ മാത്രം • പൂജ്യം ബ്രോക്കറേജ് & ഇടനിലക്കാരില്ല",
     calcLink: "ഭൂമി അളവ് കാൽക്കുലേറ്റർ",
     navHome: "ഹോം",
-    navExplore: "ഭൂമികൾ കാണുക",
-    navListFree: "സൗജന്യമായി ലിസ്റ്റ് ചെയ്യുക (0% ഫീസ്)",
+    navExplore: "ഭൂമികൾ",
+    navListFree: "ലിസ്റ്റ്",
     navDashboard: "ഡാഷ്‌ബോർഡ്",
     navSaved: "സേവ് ചെയ്തവ",
     navConverter: "കാൽക്കുലേറ്റർ",
@@ -1044,42 +1044,98 @@ class LandApp {
   }
 
   loadProperties() {
-    try {
-      const stored = localStorage.getItem('insightliker_custom_listings');
-      if (stored) {
-        const custom = JSON.parse(stored);
-        return [...custom, ...INITIAL_PROPERTIES];
-      }
-    } catch (e) {
-      console.warn('Error loading custom listings from storage', e);
-    }
     return [...INITIAL_PROPERTIES];
   }
 
-  saveCustomListing(listing) {
-    try {
-      const stored = localStorage.getItem('insightliker_custom_listings');
-      const custom = stored ? JSON.parse(stored) : [];
-      custom.unshift(listing);
-      localStorage.setItem('insightliker_custom_listings', JSON.stringify(custom));
-      this.properties = [listing, ...this.properties];
+  escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
-      // Async sync to Node.js backend if active
-      if (typeof fetch !== 'undefined') {
-        fetch('/api/properties', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(listing)
-        }).catch(() => {});
-      }
+  authHeaders(extra = {}) {
+    const headers = { ...extra };
+    const token = localStorage.getItem('insightliker_session_token');
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return headers;
+  }
 
-      // Async sync to Cloud Firestore if live Firebase is active
-      if (window.firebaseAuth?.syncPropertyToCloud) {
-        window.firebaseAuth.syncPropertyToCloud(listing);
-      }
-    } catch (e) {
-      console.error('Error saving custom listing', e);
+  parseIndianAmount(text) {
+    const cleaned = String(text || '').replace(/₹/g, '').replace(/,/g, '').trim().toLowerCase();
+    const num = parseFloat(cleaned);
+    if (!Number.isFinite(num) || num <= 0) return 0;
+    if (cleaned.includes('crore') || /(^|\s)cr(\s|$)/.test(cleaned)) return num * 10000000;
+    if (cleaned.includes('lakh') || cleaned.includes('lac')) return num * 100000;
+    return num;
+  }
+
+  formatINR(amount) {
+    if (amount >= 10000000) {
+      const crores = amount / 10000000;
+      return `₹${crores.toFixed(crores >= 10 ? 1 : 2)} Crores`;
     }
+    if (amount >= 100000) {
+      const lakhs = amount / 100000;
+      return `₹${lakhs.toFixed(lakhs >= 10 ? 1 : 2)} Lakhs`;
+    }
+    return `₹${Math.round(amount).toLocaleString('en-IN')}`;
+  }
+
+  extentToAcres(value, unit) {
+    switch (unit) {
+      case 'Acres': return value;
+      case 'Guntas': return value / 40;
+      case 'Cents': return value / 100;
+      case 'Sq.Yards': return (value * 9) / 43560;
+      case 'Sq.Ft': return value / 43560;
+      default: return value;
+    }
+  }
+
+  applyAccount(user) {
+    this.account = user || null;
+    if (window.firebaseAuth) {
+      window.firebaseAuth.currentUser = user ? {
+        uid: user.id,
+        displayName: user.name,
+        email: user.email,
+        phone: user.phone || '',
+        role: user.role,
+        photoURL: null,
+        isVerified: true,
+        provider: 'password'
+      } : null;
+      window.firebaseAuth.currentRole = user ? user.role : 'buyer';
+    }
+    this.onAuthStateChange(window.firebaseAuth ? window.firebaseAuth.currentUser : null);
+    if (this.currentView === 'dashboard') this.renderDashboard();
+    if (this.currentView === 'home') this.renderHome();
+    if (this.currentView === 'properties') this.renderProperties();
+  }
+
+  async restoreSession() {
+    const token = localStorage.getItem('insightliker_session_token');
+    if (!token) return;
+    try {
+      const res = await fetch('/api/auth/me', { headers: this.authHeaders() });
+      if (!res.ok) {
+        localStorage.removeItem('insightliker_session_token');
+        return;
+      }
+      const json = await res.json();
+      this.applyAccount(json.user);
+    } catch (err) {
+      console.warn('Session restore skipped', err.message);
+    }
+  }
+
+  upsertProperty(property) {
+    const idx = this.properties.findIndex((item) => item.id === property.id);
+    if (idx >= 0) this.properties[idx] = property;
+    else this.properties.unshift(property);
   }
 
   loadSavedProperties() {
@@ -1133,31 +1189,40 @@ class LandApp {
 
     this.renderHome();
     this.updateSavedBadgeCount();
-    this.syncServerProperties();
+    this.boot();
+  }
+
+  async boot() {
+    await this.restoreSession();
+    await this.syncServerProperties();
   }
 
   async syncServerProperties() {
     try {
-      if (typeof fetch !== 'undefined') {
-        const res = await fetch('/api/properties');
-        if (res.ok) {
-          const json = await res.json();
-          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-            const existingIds = new Set(this.properties.map(p => p.id));
-            const newServerProps = json.data.filter(p => !existingIds.has(p.id));
-            if (newServerProps.length > 0) {
-              this.properties = [...newServerProps, ...this.properties];
-              if (this.currentView === 'properties') {
-                this.renderProperties();
-              } else if (this.currentView === 'home') {
-                this.renderHome();
-              }
-            }
-          }
+      const res = await fetch('/api/properties', { headers: this.authHeaders() });
+      if (!res.ok) return;
+      const json = await res.json();
+      const serverProps = Array.isArray(json.data) ? json.data : [];
+      const serverIds = new Set(serverProps.map((property) => property.id));
+      this.properties = [
+        ...serverProps,
+        ...INITIAL_PROPERTIES.filter((property) => !serverIds.has(property.id))
+      ];
+
+      if (this.account && this.account.role === 'seller') {
+        const mineRes = await fetch('/api/me/listings', { headers: this.authHeaders() });
+        if (mineRes.ok) {
+          const mineJson = await mineRes.json();
+          (mineJson.data || []).forEach((property) => this.upsertProperty(property));
         }
       }
+
+      if (this.currentView === 'properties') this.renderProperties();
+      else if (this.currentView === 'home') this.renderHome();
+      else if (this.currentView === 'saved') this.renderSavedProperties();
+      else if (this.currentView === 'dashboard') this.renderDashboard();
     } catch (e) {
-      // Graceful offline fallback
+      // Catalog seed stays visible if the API is offline.
     }
   }
 
@@ -1268,6 +1333,11 @@ class LandApp {
       });
     }
 
+    const headerLang = document.getElementById('headerLangSelect');
+    if (headerLang) {
+      headerLang.addEventListener('change', (e) => this.setLanguage(e.target.value));
+    }
+
     // Language Selector
     const langBtns = document.querySelectorAll('[data-lang]');
     langBtns.forEach(btn => {
@@ -1334,33 +1404,23 @@ class LandApp {
   }
 
   setLanguage(lang, showToast = true) {
+    if (!TRANSLATIONS[lang]) lang = 'en';
     this.currentLanguage = lang;
     try {
       localStorage.setItem('insightliker_lang', lang);
     } catch (e) {}
 
-    // Synchronize header select dropdown
+    document.documentElement.lang = lang;
+
     const headerSelect = document.getElementById('headerLangSelect');
-    if (headerSelect) {
+    if (headerSelect && headerSelect.value !== lang) {
       headerSelect.value = lang;
     }
 
-    // Highlight active language button across all [data-lang] buttons (hero chips, drawer, etc.)
     document.querySelectorAll('[data-lang]').forEach(b => {
       const isSel = b.getAttribute('data-lang') === lang;
-      if (b.closest('#mobileDrawer')) {
-        b.classList.toggle('bg-primary-container', isSel);
-        b.classList.toggle('text-white', isSel);
-        b.classList.toggle('bg-surface-container-high', !isSel);
-        b.classList.toggle('text-on-surface', !isSel);
-      } else {
-        b.classList.toggle('bg-primary-container', isSel);
-        b.classList.toggle('text-white', isSel);
-        b.classList.toggle('shadow-md', isSel);
-        b.classList.toggle('scale-105', isSel);
-        b.classList.toggle('bg-white/15', !isSel);
-        b.classList.toggle('text-white/90', !isSel);
-      }
+      b.classList.toggle('is-lang-active', isSel);
+      b.setAttribute('aria-pressed', isSel ? 'true' : 'false');
     });
 
     const dict = TRANSLATIONS[lang] || TRANSLATIONS['en'];
@@ -1828,9 +1888,33 @@ class LandApp {
     }
   }
 
-  revealOwnerContact(id, method = 'call') {
-    const prop = this.properties.find(p => p.id === id);
+  async revealOwnerContact(id, method = 'call') {
+    if (!this.account) {
+      this.openAuthModal('signin', 'buyer');
+      this.showToast('Sign in to view the landowner phone number.');
+      return;
+    }
+    let prop = this.properties.find(p => p.id === id);
     if (!prop) return;
+    if (prop.contactLocked || !prop.owner?.whatsapp) {
+      try {
+        const res = await fetch(`/api/properties/${encodeURIComponent(id)}`, { headers: this.authHeaders() });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.property) {
+            prop = json.property;
+            this.upsertProperty(prop);
+          }
+        }
+      } catch (err) {
+        this.showToast('Could not load the landowner contact.', 'error');
+        return;
+      }
+    }
+    if (!prop.owner?.phone || prop.contactLocked) {
+      this.showToast('Contact is available after you sign in.');
+      return;
+    }
 
     const modal = document.getElementById('ownerContactModal');
     const container = document.getElementById('ownerContactContent');
@@ -1880,6 +1964,15 @@ class LandApp {
   openSiteVisitScheduler(id) {
     const prop = this.properties.find(p => p.id === id);
     if (!prop) return;
+    if (!this.account) {
+      this.openAuthModal('signin', 'buyer');
+      this.showToast('Sign in as a buyer to request a field visit.');
+      return;
+    }
+    if (this.account.role !== 'buyer') {
+      this.showToast('Visit requests are sent from a buyer account.');
+      return;
+    }
 
     const modal = document.getElementById('ownerContactModal');
     const container = document.getElementById('ownerContactContent');
@@ -1928,40 +2021,37 @@ class LandApp {
     this.openModal('ownerContactModal');
   }
 
-  handleSiteVisitSubmit(id) {
+  async handleSiteVisitSubmit(id) {
+    if (!this.account || this.account.role !== 'buyer') {
+      this.openAuthModal('signin', 'buyer');
+      this.showToast('Sign in as a buyer to request a field visit.');
+      return;
+    }
     const form = document.getElementById('siteVisitForm');
     const inputs = form ? form.querySelectorAll('input, textarea') : [];
+    const property = this.properties.find((item) => item.id === id);
     const visitData = {
-      id: `visit-${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      status: 'Scheduled',
       propertyId: id,
-      buyerName: inputs[0]?.value || 'Direct Buyer',
+      propertyTitle: property?.title || 'Land parcel',
+      buyerName: inputs[0]?.value || this.account.name,
       phone: inputs[1]?.value || '',
       preferredDate: inputs[2]?.value || '',
       notes: inputs[3]?.value || ''
     };
 
     try {
-      const storedVisits = JSON.parse(localStorage.getItem('insightliker_site_visits') || '[]');
-      storedVisits.unshift(visitData);
-      localStorage.setItem('insightliker_site_visits', JSON.stringify(storedVisits));
-    } catch (e) {}
-
-    if (typeof fetch !== 'undefined') {
-      fetch('/api/site-visits', {
+      const res = await fetch('/api/site-visits', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(visitData)
-      }).catch(() => {});
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Could not send the visit request.');
+      this.closeModal('ownerContactModal');
+      this.showToast('Visit request sent to the landowner. Track it in your buyer dashboard.');
+    } catch (err) {
+      this.showToast(err.message || 'Could not send the visit request.', 'error');
     }
-
-    if (window.firebaseAuth?.syncVisitToCloud) {
-      window.firebaseAuth.syncVisitToCloud(visitData);
-    }
-
-    this.closeModal('ownerContactModal');
-    this.showToast("Visit request forwarded directly to the landowner via SMS & WhatsApp!");
   }
 
   openReportBroker(id) {
@@ -2033,7 +2123,7 @@ class LandApp {
     const featuredContainer = document.getElementById('homeFeaturedContainer');
     if (!featuredContainer) return;
 
-    const featured = this.properties.filter(p => p.featured).slice(0, 4);
+    const featured = this.properties.filter(p => p.featured && p.listingStatus !== 'Sold').slice(0, 4);
     featuredContainer.innerHTML = featured.map(p => this.renderPropertyCard(p)).join('');
   }
 
@@ -2072,6 +2162,7 @@ class LandApp {
 
   getFilteredProperties() {
     return this.properties.filter(p => {
+      if (p.listingStatus === 'Sold') return false;
       // State
       if (this.activeFilters.state !== 'All' && p.state !== this.activeFilters.state) {
         return false;
@@ -2145,6 +2236,27 @@ class LandApp {
   }
 
   renderPropertyCard(p) {
+    const raw = p;
+    const e = (value) => this.escapeHtml(value);
+    p = {
+      ...raw,
+      id: /^[A-Za-z0-9_-]+$/.test(String(raw.id)) ? raw.id : '',
+      title: e(raw.title),
+      corridor: e(raw.corridor),
+      state: e(raw.state),
+      tagline: e(raw.tagline),
+      extent: e(raw.extent),
+      roadWidth: e(raw.roadWidth),
+      pricePerUnit: e(raw.pricePerUnit),
+      priceDisplay: e(raw.priceDisplay),
+      titleStatus: e(raw.titleStatus || 'Owner'),
+      images: [e(raw.images?.[0] || '')],
+      owner: {
+        ...(raw.owner || {}),
+        name: e(raw.owner?.name),
+        avatarInitials: e(raw.owner?.avatarInitials || 'LL')
+      }
+    };
     const isSaved = this.savedPropertyIds.includes(p.id);
     const dict = TRANSLATIONS[this.currentLanguage] || TRANSLATIONS['en'];
 
@@ -2360,7 +2472,13 @@ class LandApp {
   }
 
   // List Your Property Free 4-Step Form Wizard
-  handleListPropertySubmit(form) {
+  async handleListPropertySubmit(form) {
+    if (!this.account || this.account.role !== 'seller') {
+      this.openAuthModal('signup', 'seller');
+      this.showToast('Create a landowner account to publish a listing.');
+      return;
+    }
+
     const formData = new FormData(form);
 
     const title = formData.get('title');
@@ -2368,7 +2486,7 @@ class LandApp {
     const district = formData.get('district');
     const corridor = formData.get('corridor');
     const category = formData.get('category');
-    const extentValue = parseFloat(formData.get('extentValue')) || 1;
+    const extentValue = parseFloat(formData.get('extentValue')) || 0;
     const extentUnit = formData.get('extentUnit') || 'Acres';
     const pricePerUnit = formData.get('pricePerUnit');
     const roadAccess = formData.get('roadAccess');
@@ -2376,24 +2494,35 @@ class LandApp {
     const ownerName = formData.get('ownerName');
     const ownerPhone = formData.get('ownerPhone');
     const description = formData.get('description');
+    const unitPrice = this.parseIndianAmount(pricePerUnit);
+    const totalPrice = unitPrice * extentValue;
+    if (!extentValue || !unitPrice) {
+      this.showToast('Enter the extent and a price such as 45 Lakhs or 3400.', 'error');
+      return;
+    }
 
-    // Generate unique ID
-    const newId = `prop-owner-${Date.now()}`;
+    const statePins = {
+      Telangana: [17.385, 78.4867],
+      Karnataka: [12.9716, 77.5946],
+      'Andhra Pradesh': [15.9129, 79.74],
+      'Tamil Nadu': [11.1271, 78.6569],
+      Kerala: [10.8505, 76.2711]
+    };
+    const pin = statePins[state] || [13.0, 77.5];
     const newListing = {
-      id: newId,
       title: title || `${extentValue} ${extentUnit} ${category} in ${district || corridor}`,
       category: category,
-      tagline: `Direct owner listing with ${roadAccess} & verified title`,
+      tagline: `Direct owner listing with ${roadAccess}`,
       state: state,
       corridor: corridor || `${district} Regional Belt`,
       district: district,
       village: corridor || district,
       pricePerUnit: `₹${pricePerUnit} / ${extentUnit}`,
-      priceTotalNum: 5000000,
-      priceDisplay: `₹${pricePerUnit} / ${extentUnit}`,
+      priceTotalNum: Math.round(totalPrice),
+      priceDisplay: this.formatINR(totalPrice),
       unitType: extentUnit,
       extent: `${extentValue} ${extentUnit}`,
-      extentNum: extentUnit === 'Acres' ? extentValue : (extentValue / 40),
+      extentNum: this.extentToAcres(extentValue, extentUnit),
       roadAccess: roadAccess,
       roadWidth: 30,
       waterSource: waterSource,
@@ -2407,7 +2536,6 @@ class LandApp {
       conversionStatus: `${category} Land`,
       suitableFor: "Multiple Purposes, Direct Buyer Inspection",
       featured: true,
-      ownerUid: window.firebaseAuth?.currentUser?.uid || null,
       owner: {
         name: ownerName,
         phone: ownerPhone,
@@ -2422,7 +2550,7 @@ class LandApp {
       images: [
         this.uploadedPreviewImage || "assets/images/hero_land.jpg"
       ],
-      coordinates: [13.0 + Math.random() * 4, 77.0 + Math.random() * 3],
+      coordinates: [pin[0] + (Math.random() - 0.5) * 0.4, pin[1] + (Math.random() - 0.5) * 0.4],
       description: description || "Directly offered by registered owner. No middlemen, zero brokerage. Genuine buyers can inspect survey stones and land records directly.",
       documents: [
         { name: "Pattadar Passbook / Title Deed", status: "Uploaded by Owner", id: "DOC-NEW" },
@@ -2430,19 +2558,33 @@ class LandApp {
       ]
     };
 
-    this.saveCustomListing(newListing);
-    form.reset();
-    this.uploadedPreviewImage = null;
-
-    // Toast and switch to new property
-    this.showToast("Congratulations! Your land has been listed 100% FREE without brokerage.");
-    setTimeout(() => {
-      this.openPropertyDetail(newId);
-    }, 600);
+    try {
+      const res = await fetch('/api/properties', {
+        method: 'POST',
+        headers: this.authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(newListing)
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Could not publish this listing.');
+      this.upsertProperty(json.property);
+      form.reset();
+      this.uploadedPreviewImage = null;
+      const preview = document.getElementById('listPhotoPreview');
+      if (preview) preview.classList.add('hidden');
+      this.showToast('Your land is published. Buyers can view it now.');
+      this.openPropertyDetail(json.property.id);
+    } catch (err) {
+      this.showToast(err.message || 'Could not publish this listing.', 'error');
+    }
   }
 
   handleImageUpload(input) {
     if (input.files && input.files[0]) {
+      if (input.files[0].size > 1.5 * 1024 * 1024) {
+        this.showToast('Use a photo smaller than 1.5 MB.', 'error');
+        input.value = '';
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (e) => {
         this.uploadedPreviewImage = e.target.result;
@@ -2488,15 +2630,28 @@ class LandApp {
     const listAuthActionBtn = document.getElementById('listAuthActionBtn');
     const listOwnerName = document.getElementById('listOwnerName');
     const listOwnerPhone = document.getElementById('listOwnerPhone');
+    const listGuestBlock = document.getElementById('listGuestBlock');
+    const listBuyerBlock = document.getElementById('listBuyerBlock');
+    const listSellerWorkspace = document.getElementById('listSellerWorkspace');
+
+    const role = user ? (user.role || 'buyer') : null;
+    if (listGuestBlock) listGuestBlock.classList.toggle('hidden', !!user);
+    if (listBuyerBlock) listBuyerBlock.classList.toggle('hidden', role !== 'buyer');
+    if (listSellerWorkspace) listSellerWorkspace.classList.toggle('hidden', role !== 'seller');
 
     if (user) {
       const displayName = user.displayName || user.email.split('@')[0];
-      const role = user.role || window.firebaseAuth.currentRole || 'buyer';
       const roleText = role === 'seller' ? 'Direct Landowner' : 'Verified Buyer';
       const initials = displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U';
 
-      if (authNavBtn) authNavBtn.classList.add('hidden');
-      if (authNavUser) authNavUser.classList.remove('hidden');
+      if (authNavBtn) {
+        authNavBtn.classList.add('hidden');
+        authNavBtn.style.display = 'none';
+      }
+      if (authNavUser) {
+        authNavUser.classList.remove('hidden');
+        authNavUser.style.display = '';
+      }
       if (authUserName) authUserName.textContent = displayName;
       if (authUserRoleBadge) authUserRoleBadge.textContent = role === 'seller' ? 'Landowner' : 'Buyer';
       if (authUserAvatar) {
@@ -2517,11 +2672,11 @@ class LandApp {
       if (mobileUserAvatar) mobileUserAvatar.textContent = initials;
 
       // List Property view prefill
-      if (listAuthTitle) listAuthTitle.textContent = `Logged in as: ${displayName} (${roleText})`;
-      if (listAuthDesc) listAuthDesc.textContent = role === 'seller' ? 'Your property will be published directly under your verified landowner account.' : 'Tip: You are currently browsing in Buyer mode. Switch to Landowner mode in your profile.';
+      if (listAuthTitle) listAuthTitle.textContent = `Listing as ${displayName}`;
+      if (listAuthDesc) listAuthDesc.textContent = 'This listing is published on your landowner account and appears for buyers immediately.';
       if (listAuthActionBtn) {
-        listAuthActionBtn.textContent = 'Switch Role';
-        listAuthActionBtn.onclick = () => this.toggleUserRole();
+        listAuthActionBtn.textContent = 'Open dashboard';
+        listAuthActionBtn.onclick = () => { window.location.hash = 'dashboard'; };
       }
 
       if (role === 'seller') {
@@ -2529,8 +2684,14 @@ class LandApp {
         if (listOwnerPhone && !listOwnerPhone.value && user.phone) listOwnerPhone.value = user.phone;
       }
     } else {
-      if (authNavBtn) authNavBtn.classList.remove('hidden');
-      if (authNavUser) authNavUser.classList.add('hidden');
+      if (authNavBtn) {
+        authNavBtn.classList.remove('hidden');
+        authNavBtn.style.display = '';
+      }
+      if (authNavUser) {
+        authNavUser.classList.add('hidden');
+        authNavUser.style.display = 'none';
+      }
       if (mobileUnlogged) mobileUnlogged.classList.remove('hidden');
       if (mobileLogged) mobileLogged.classList.add('hidden');
 
@@ -2590,14 +2751,17 @@ class LandApp {
       if (googleBtn) googleBtn.classList.remove('hidden');
       if (divider) divider.classList.remove('hidden');
 
+      const roleSection = document.getElementById('authRoleSection');
       if (tab === 'signin') {
         if (titleEl) titleEl.textContent = "Sign In to InSightLiker";
         if (nameField) nameField.classList.add('hidden');
         if (submitText) submitText.textContent = "Sign In";
+        if (roleSection) roleSection.classList.add('hidden');
       } else {
         if (titleEl) titleEl.textContent = "Create Free Account";
         if (nameField) nameField.classList.remove('hidden');
         if (submitText) submitText.textContent = "Create Account";
+        if (roleSection) roleSection.classList.remove('hidden');
       }
     }
   }
@@ -2663,6 +2827,14 @@ class LandApp {
     }
   }
 
+  fillDemoAccount(role) {
+    this.switchAuthTab('signin');
+    const email = document.getElementById('authInputEmail');
+    const password = document.getElementById('authInputPassword');
+    if (email) email.value = role === 'seller' ? 'seller@insightliker.com' : 'buyer@insightliker.com';
+    if (password) password.value = role === 'seller' ? 'Seller@123' : 'Buyer@123';
+  }
+
   async handleAuthSubmit(form) {
     const email = document.getElementById('authInputEmail')?.value.trim();
     const password = document.getElementById('authInputPassword')?.value;
@@ -2674,15 +2846,24 @@ class LandApp {
     if (errorEl) errorEl.classList.add('hidden');
 
     try {
-      if (this.authMode === 'signup') {
-        await window.firebaseAuth.signUpWithEmail(name, email, password, role);
-        this.showToast(`Welcome ${name}! Your ${role === 'seller' ? 'Landowner' : 'Buyer'} account is ready.`);
-      } else {
-        await window.firebaseAuth.signInWithEmail(email, password);
-        this.showToast("Signed in successfully!");
-      }
+      const isSignup = this.authMode === 'signup';
+      const res = await fetch(isSignup ? '/api/auth/register' : '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(isSignup ? { name, email, password, role } : { email, password })
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Authentication failed.');
+      localStorage.setItem('insightliker_session_token', json.token);
+      this.applyAccount(json.user);
+      await this.syncServerProperties();
       this.closeModal('authModal');
       form.reset();
+      const label = json.user.role === 'seller' ? 'landowner' : 'buyer';
+      this.showToast(isSignup ? `Welcome ${json.user.name}. Your ${label} account is ready.` : `Signed in as ${label}.`);
+      if (json.user.role === 'seller') window.location.hash = 'dashboard';
+      else if (this.currentView === 'list-property') window.location.hash = 'properties';
+      else if (this.currentView === 'dashboard') this.renderDashboard();
     } catch (err) {
       if (errorEl) {
         errorEl.textContent = err.message || "Authentication failed. Please check your credentials.";
@@ -2710,7 +2891,17 @@ class LandApp {
   async handleSignOut() {
     const dropdown = document.getElementById('authUserDropdown');
     if (dropdown) dropdown.classList.add('hidden');
-    await window.firebaseAuth.signOut();
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', headers: this.authHeaders() });
+    } catch (err) {
+      // Local sign-out still clears the session.
+    }
+    localStorage.removeItem('insightliker_session_token');
+    this.applyAccount(null);
+    await this.syncServerProperties();
+    if (this.currentView === 'dashboard' || this.currentView === 'list-property') {
+      window.location.hash = 'home';
+    }
     this.showToast("You have been signed out.");
   }
 
@@ -2722,12 +2913,8 @@ class LandApp {
   }
 
   toggleUserRole() {
-    const current = window.firebaseAuth.currentRole || 'buyer';
-    const nextRole = current === 'buyer' ? 'seller' : 'buyer';
-    window.firebaseAuth.switchRole(nextRole);
-    const dropdown = document.getElementById('authUserDropdown');
-    if (dropdown) dropdown.classList.add('hidden');
-    this.showToast(`Switched account role to: ${nextRole === 'seller' ? 'Direct Landowner (Seller)' : 'Verified Land Buyer'}`);
+    const role = this.account?.role === 'seller' ? 'landowner' : 'buyer';
+    this.showToast(`This account is a ${role}. Register a second email if you need the other dashboard.`);
   }
 
   openFirebaseConfigModal() {
@@ -2767,37 +2954,82 @@ class LandApp {
     }
   }
 
+  showEl(el, shown, display) {
+    if (!el) return;
+    el.classList.toggle('hidden', !shown);
+    if (shown) el.style.display = display || '';
+    else el.style.display = 'none';
+  }
+
   // --- Landowner & Buyer Dashboard Management ---
   switchDashTab(tab) {
-    this.currentDashTab = tab; // 'listings' | 'visits' | 'buyer-visits'
-    const listingsBtn = document.getElementById('dashTabListingsBtn');
-    const visitsBtn = document.getElementById('dashTabVisitsBtn');
-    const buyerVisitsBtn = document.getElementById('dashTabBuyerVisitsBtn');
+    this.currentDashTab = tab;
+    const buttons = {
+      listings: document.getElementById('dashTabListingsBtn'),
+      visits: document.getElementById('dashTabVisitsBtn'),
+      saved: document.getElementById('dashTabSavedBtn'),
+      'buyer-visits': document.getElementById('dashTabBuyerVisitsBtn')
+    };
+    const sections = {
+      listings: document.getElementById('dashSectionListings'),
+      visits: document.getElementById('dashSectionVisits'),
+      saved: document.getElementById('dashSectionSaved'),
+      'buyer-visits': document.getElementById('dashSectionBuyerVisits')
+    };
 
-    const secListings = document.getElementById('dashSectionListings');
-    const secVisits = document.getElementById('dashSectionVisits');
-    const secBuyerVisits = document.getElementById('dashSectionBuyerVisits');
-
-    const setBtnStyle = (btn, active) => {
+    Object.entries(buttons).forEach(([name, btn]) => {
       if (!btn) return;
+      const active = name === tab;
       btn.classList.toggle('bg-primary-container', active);
       btn.classList.toggle('text-white', active);
       btn.classList.toggle('shadow-sm', active);
       btn.classList.toggle('text-on-surface-variant', !active);
-    };
+    });
 
-    setBtnStyle(listingsBtn, tab === 'listings');
-    setBtnStyle(visitsBtn, tab === 'visits');
-    setBtnStyle(buyerVisitsBtn, tab === 'buyer-visits');
+    Object.entries(sections).forEach(([name, section]) => {
+      this.showEl(section, name === tab);
+    });
+    if (tab === 'saved') this.renderDashboardSaved();
+  }
 
-    if (secListings) secListings.classList.toggle('hidden', tab !== 'listings');
-    if (secVisits) secVisits.classList.toggle('hidden', tab !== 'visits');
-    if (secBuyerVisits) secBuyerVisits.classList.toggle('hidden', tab !== 'buyer-visits');
+  renderDashboardSaved() {
+    const container = document.getElementById('dashboardSavedContainer');
+    if (!container) return;
+    const saved = this.properties.filter((property) => this.savedPropertyIds.includes(property.id) && property.listingStatus !== 'Sold');
+    if (saved.length === 0) {
+      container.innerHTML = `
+        <div class="col-span-full py-12 text-center bg-white rounded-3xl border border-border-light">
+          <span class="material-symbols-outlined text-[40px] text-on-surface-variant">bookmark_border</span>
+          <h3 class="font-heading font-bold text-lg text-primary mt-2">No saved lands yet</h3>
+          <p class="text-xs text-on-surface-variant mt-1">Bookmark a parcel while you browse, then come back to it here.</p>
+          <a href="#properties" class="inline-flex mt-4 py-2.5 px-5 rounded-xl btn-primary-kinetic text-xs font-bold">View properties</a>
+        </div>
+      `;
+    } else {
+      container.innerHTML = saved.map((property) => this.renderPropertyCard(property)).join('');
+    }
   }
 
   async renderDashboard() {
+    const gate = document.getElementById('dashboardGate');
+    const shell = document.getElementById('dashboardShell');
+    const user = this.account;
+
+    if (!user) {
+      this.showEl(gate, true);
+      this.showEl(shell, false);
+      return;
+    }
+
+    this.showEl(gate, false);
+    this.showEl(shell, true);
+
+    const isSeller = user.role === 'seller';
     const roleBadge = document.getElementById('dashRoleBadge');
-    const switchBtn = document.getElementById('dashRoleSwitchBtn');
+    const title = document.getElementById('dashTitle');
+    const subtitle = document.getElementById('dashSubtitle');
+    const labelListings = document.getElementById('dashMetricLabelListings');
+    const labelVisits = document.getElementById('dashMetricLabelVisits');
     const metricListings = document.getElementById('dashMetricListings');
     const metricVisits = document.getElementById('dashMetricVisits');
     const metricSaved = document.getElementById('dashMetricSaved');
@@ -2806,122 +3038,103 @@ class LandApp {
     const visitsContainer = document.getElementById('dashboardVisitsContainer');
     const buyerVisitsContainer = document.getElementById('dashboardBuyerVisitsContainer');
 
-    const user = window.firebaseAuth?.currentUser;
-    const role = window.firebaseAuth?.currentRole || 'seller';
+    this.showEl(document.getElementById('dashListNewBtn'), isSeller, 'inline-flex');
+    this.showEl(document.getElementById('dashTabListingsBtn'), isSeller, 'inline-flex');
+    this.showEl(document.getElementById('dashTabVisitsBtn'), isSeller, 'inline-flex');
+    this.showEl(document.getElementById('dashTabSavedBtn'), !isSeller, 'inline-flex');
+    this.showEl(document.getElementById('dashTabBuyerVisitsBtn'), !isSeller, 'inline-flex');
+    this.showEl(document.getElementById('dashTabBrowseBtn'), !isSeller, 'inline-flex');
 
     if (roleBadge) {
-      roleBadge.textContent = role === 'seller' ? 'Direct Landowner Mode' : 'Verified Buyer Mode';
-      roleBadge.className = role === 'seller' 
+      roleBadge.textContent = isSeller ? 'Landowner' : 'Buyer';
+      roleBadge.className = isSeller
         ? 'px-2.5 py-0.5 rounded-full bg-secondary text-white font-bold text-xs uppercase'
         : 'px-2.5 py-0.5 rounded-full bg-primary-container text-white font-bold text-xs uppercase';
     }
-    if (switchBtn) {
-      switchBtn.textContent = role === 'seller' ? 'Switch to Buyer Mode' : 'Switch to Landowner Mode';
+    if (title) title.textContent = isSeller ? 'Landowner dashboard' : 'Buyer dashboard';
+    if (subtitle) {
+      subtitle.textContent = isSeller
+        ? 'Publish land and respond to buyer visit requests.'
+        : 'View published lands, saved parcels, and your visit requests.';
     }
+    if (labelListings) labelListings.textContent = isSeller ? 'My listings' : 'Saved lands';
+    if (labelVisits) labelVisits.textContent = isSeller ? 'Visit requests' : 'My visits';
 
-    // Filter properties listed by user or custom listings
-    const myProperties = this.properties.filter(p => {
-      return p.id.startsWith('prop-owner-') || 
-             p.id.startsWith('prop-node-') || 
-             (user && p.ownerUid === user.uid);
-    });
-
-    // Fetch site visits from server or local fallback
+    let myProperties = [];
     let visits = [];
     try {
-      if (typeof fetch !== 'undefined') {
-        const res = await fetch('/api/site-visits');
+      if (isSeller) {
+        const res = await fetch('/api/me/listings', { headers: this.authHeaders() });
         if (res.ok) {
           const json = await res.json();
-          visits = json.data || [];
+          myProperties = json.data || [];
+          myProperties.forEach((property) => this.upsertProperty(property));
         }
       }
-    } catch (e) {}
-
-    if (visits.length === 0) {
-      try {
-        visits = JSON.parse(localStorage.getItem('insightliker_site_visits') || '[]');
-      } catch (e) {}
+      const visitRes = await fetch('/api/me/visits', { headers: this.authHeaders() });
+      if (visitRes.ok) {
+        const json = await visitRes.json();
+        visits = json.data || [];
+      }
+    } catch (err) {
+      this.showToast('Could not load your dashboard.', 'error');
     }
 
-    // Update KPI counters
-    if (metricListings) metricListings.textContent = myProperties.length;
-    if (metricVisits) metricVisits.textContent = visits.length;
-    if (visitsCountBadge) {
-      visitsCountBadge.textContent = visits.length;
-      visitsCountBadge.classList.toggle('hidden', visits.length === 0);
-    }
-    if (metricSaved) {
-      const savedAmount = myProperties.length > 0 ? (myProperties.length * 1.8).toFixed(1) : "0";
-      metricSaved.textContent = `₹${savedAmount}L Saved`;
-    }
+    const savedCount = this.savedPropertyIds.filter((id) => this.properties.some((property) => property.id === id)).length;
+    if (metricListings) metricListings.textContent = String(isSeller ? myProperties.length : savedCount);
+    if (metricVisits) metricVisits.textContent = String(visits.length);
+    this.showEl(visitsCountBadge, visits.length > 0, 'inline-flex');
+    if (visitsCountBadge) visitsCountBadge.textContent = String(visits.length);
+    if (metricSaved) metricSaved.textContent = '₹0 Fee';
 
-    // Render My Properties Tab
     if (propsContainer) {
-      if (myProperties.length === 0) {
+      if (!isSeller) {
+        propsContainer.innerHTML = '';
+      } else if (myProperties.length === 0) {
         propsContainer.innerHTML = `
           <div class="p-8 text-center bg-white rounded-3xl border border-border-light shadow-sm flex flex-col items-center justify-center gap-3">
             <div class="w-16 h-16 rounded-2xl bg-surface-container text-primary flex items-center justify-center">
               <span class="material-symbols-outlined text-[36px]">add_business</span>
             </div>
-            <h3 class="font-heading font-bold text-lg text-primary">No land listings created yet</h3>
-            <p class="text-xs text-on-surface-variant max-w-md">
-              Are you a farmer or landowner? List your agricultural land or plot 100% free with zero brokerage.
-            </p>
-            <a href="#list-property" class="mt-2 py-2.5 px-5 rounded-xl btn-primary-kinetic text-xs font-bold flex items-center gap-2">
+            <h3 class="font-heading font-bold text-lg text-primary">No land listings yet</h3>
+            <p class="text-xs text-on-surface-variant max-w-md">Publish your first parcel. Buyers will see it on Explore Lands.</p>
+            <a href="#list-property" class="mt-2 py-2.5 px-5 rounded-xl btn-primary-kinetic text-xs font-bold inline-flex items-center gap-2">
               <span class="material-symbols-outlined text-[18px]">add_circle</span>
-              <span>+ List Your First Land Free</span>
+              <span>List your first land</span>
             </a>
           </div>
         `;
       } else {
-        propsContainer.innerHTML = myProperties.map(p => {
-          const status = p.listingStatus || 'Available';
+        propsContainer.innerHTML = myProperties.map((property) => {
+          const status = property.listingStatus || 'Available';
           const statusColors = {
             'Available': 'bg-emerald-100 text-emerald-800 border-emerald-300',
             'Under Negotiation': 'bg-amber-100 text-amber-800 border-amber-300',
             'Sold': 'bg-gray-100 text-gray-700 border-gray-300'
           };
-          const badgeClass = statusColors[status] || statusColors['Available'];
-
+          const badgeClass = statusColors[status] || statusColors.Available;
+          const id = /^[A-Za-z0-9_-]+$/.test(property.id) ? property.id : '';
           return `
             <div class="p-4 md:p-5 rounded-2xl bg-white border border-border-light shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div class="flex items-center gap-4">
-                <img src="${p.images[0]}" alt="${p.title}" class="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover shrink-0 border border-border-light">
+                <img src="${this.escapeHtml(property.images?.[0] || '')}" alt="" class="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover shrink-0 border border-border-light">
                 <div class="flex flex-col gap-1">
                   <div class="flex items-center gap-2 flex-wrap">
-                    <span class="px-2.5 py-0.5 rounded-full border text-[11px] font-bold ${badgeClass}">
-                      ● ${status}
-                    </span>
-                    <span class="text-xs text-secondary font-semibold uppercase tracking-wider">${p.category}</span>
-                    <span class="text-xs text-on-surface-variant">• ${p.state}</span>
+                    <span class="px-2.5 py-0.5 rounded-full border text-[11px] font-bold ${badgeClass}">${this.escapeHtml(status)}</span>
+                    <span class="text-xs text-secondary font-semibold uppercase tracking-wider">${this.escapeHtml(property.category)}</span>
+                    <span class="text-xs text-on-surface-variant">${this.escapeHtml(property.state)}</span>
                   </div>
-                  <h4 class="font-heading font-bold text-base text-primary hover:underline cursor-pointer" onclick="app.openPropertyDetail('${p.id}')">
-                    ${p.title}
-                  </h4>
+                  <h4 class="font-heading font-bold text-base text-primary hover:underline cursor-pointer" onclick="app.openPropertyDetail('${id}')">${this.escapeHtml(property.title)}</h4>
                   <div class="text-xs text-on-surface-variant flex items-center gap-2">
-                    <span class="font-bold text-primary">${p.priceDisplay}</span>
-                    <span>(${p.pricePerUnit})</span>
-                    <span>•</span>
-                    <span>${p.extent}</span>
+                    <span class="font-bold text-primary">${this.escapeHtml(property.priceDisplay)}</span>
+                    <span>${this.escapeHtml(property.extent)}</span>
                   </div>
                 </div>
               </div>
-
-              <!-- Action Buttons -->
               <div class="flex items-center gap-2 flex-wrap self-end md:self-center">
-                <button onclick="app.togglePropertyStatus('${p.id}')" class="py-2 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-xs font-bold text-primary flex items-center gap-1 transition-colors" title="Cycle Status: Available / Negotiation / Sold">
-                  <span class="material-symbols-outlined text-[16px]">sync</span>
-                  <span>Change Status</span>
-                </button>
-                <button onclick="app.openPropertyDetail('${p.id}')" class="py-2 px-3 rounded-xl border border-border-light hover:bg-surface-container text-xs font-bold text-on-surface flex items-center gap-1 transition-colors">
-                  <span class="material-symbols-outlined text-[16px]">visibility</span>
-                  <span>View</span>
-                </button>
-                <button onclick="app.deleteProperty('${p.id}')" class="py-2 px-3 rounded-xl border border-red-200 hover:bg-red-50 text-xs font-bold text-red-600 flex items-center gap-1 transition-colors">
-                  <span class="material-symbols-outlined text-[16px]">delete</span>
-                  <span>Delete</span>
-                </button>
+                <button onclick="app.togglePropertyStatus('${id}')" class="py-2 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-xs font-bold text-primary">Change status</button>
+                <button onclick="app.openPropertyDetail('${id}')" class="py-2 px-3 rounded-xl border border-border-light hover:bg-surface-container text-xs font-bold text-on-surface">View</button>
+                <button onclick="app.deleteProperty('${id}')" class="py-2 px-3 rounded-xl border border-red-200 hover:bg-red-50 text-xs font-bold text-red-600">Delete</button>
               </div>
             </div>
           `;
@@ -2929,49 +3142,32 @@ class LandApp {
       }
     }
 
-    // Render Incoming Visits Tab
     if (visitsContainer) {
-      if (visits.length === 0) {
+      if (!isSeller || visits.length === 0) {
         visitsContainer.innerHTML = `
-          <div class="p-8 text-center bg-white rounded-3xl border border-border-light shadow-sm flex flex-col items-center justify-center gap-2">
+          <div class="p-8 text-center bg-white rounded-3xl border border-border-light shadow-sm">
             <span class="material-symbols-outlined text-[36px] text-on-surface-variant">event_busy</span>
-            <h4 class="font-heading font-bold text-base text-primary">No field visit appointments yet</h4>
-            <p class="text-xs text-on-surface-variant max-w-sm">When buyers request on-site boundary or soil inspections, their requests will appear here with instant WhatsApp and phone links.</p>
+            <h4 class="font-heading font-bold text-base text-primary mt-2">No visit requests yet</h4>
+            <p class="text-xs text-on-surface-variant">When a buyer asks to inspect one of your parcels, the request shows up here.</p>
           </div>
         `;
       } else {
-        visitsContainer.innerHTML = visits.map(v => {
-          const prop = this.properties.find(p => p.id === v.propertyId);
-          const propTitle = prop ? prop.title : `Land Parcel (${v.propertyId})`;
-          const cleanPhone = v.phone.replace(/[^0-9]/g, '');
-
+        visitsContainer.innerHTML = visits.map((visit) => {
+          const cleanPhone = String(visit.phone || '').replace(/[^0-9]/g, '');
+          const id = /^[A-Za-z0-9_-]+$/.test(visit.id) ? visit.id : '';
           return `
             <div class="p-4 md:p-5 rounded-2xl bg-white border border-border-light shadow-sm flex flex-col md:flex-row md:items-start justify-between gap-4">
               <div class="flex flex-col gap-1.5">
-                <div class="flex items-center gap-2">
-                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold ${v.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                    ${v.status || 'Scheduled'}
-                  </span>
-                  <span class="text-xs text-on-surface-variant font-medium">Requested: ${v.preferredDate || 'Flexible'}</span>
-                </div>
-                <h4 class="font-heading font-bold text-base text-primary">Buyer: ${v.buyerName}</h4>
-                <p class="text-xs text-secondary font-semibold">Interested in: ${propTitle}</p>
-                ${v.notes ? `<p class="text-xs text-on-surface-variant bg-surface-container-low p-2.5 rounded-xl border border-border-light mt-1">"${v.notes}"</p>` : ''}
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold ${visit.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} w-fit">${this.escapeHtml(visit.status || 'Scheduled')}</span>
+                <h4 class="font-heading font-bold text-base text-primary">Buyer: ${this.escapeHtml(visit.buyerName)}</h4>
+                <p class="text-xs text-secondary font-semibold">${this.escapeHtml(visit.propertyTitle || 'Land parcel')}</p>
+                <p class="text-xs text-on-surface-variant">Preferred date: ${this.escapeHtml(visit.preferredDate || 'Flexible')}</p>
+                ${visit.notes ? `<p class="text-xs text-on-surface-variant bg-surface-container-low p-2.5 rounded-xl border border-border-light mt-1">${this.escapeHtml(visit.notes)}</p>` : ''}
               </div>
-
-              <!-- Quick Communication Tools -->
               <div class="flex items-center gap-2 flex-wrap shrink-0">
-                <a href="tel:${cleanPhone}" class="py-2 px-3 rounded-xl btn-primary-kinetic text-xs font-bold flex items-center gap-1.5 shadow-sm">
-                  <span class="material-symbols-outlined text-[16px]">call</span>
-                  <span>Call Buyer</span>
-                </a>
-                <a href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hello ${v.buyerName}, this is regarding your visit request for ${propTitle}. I am the direct landowner.`)}" target="_blank" rel="noopener" class="py-2 px-3 rounded-xl bg-surface-container-high hover:bg-surface-container text-primary text-xs font-bold flex items-center gap-1.5 transition-colors">
-                  <span class="material-symbols-outlined text-[16px] text-secondary">chat</span>
-                  <span>WhatsApp</span>
-                </a>
-                <button onclick="app.updateVisitStatus('${v.id}', 'Confirmed')" class="py-2 px-3 rounded-xl border border-border-light hover:bg-surface-container text-xs font-bold text-primary">
-                  Confirm
-                </button>
+                <a href="tel:${cleanPhone}" class="py-2 px-3 rounded-xl btn-primary-kinetic text-xs font-bold">Call buyer</a>
+                <button onclick="app.updateVisitStatus('${id}', 'Confirmed')" class="py-2 px-3 rounded-xl border border-border-light text-xs font-bold text-primary">Confirm</button>
+                <button onclick="app.updateVisitStatus('${id}', 'Completed')" class="py-2 px-3 rounded-xl border border-border-light text-xs font-bold text-primary">Completed</button>
               </div>
             </div>
           `;
@@ -2979,123 +3175,90 @@ class LandApp {
       }
     }
 
-    // Render Buyer's Scheduled Visits Tab
     if (buyerVisitsContainer) {
-      if (visits.length === 0) {
+      if (isSeller || visits.length === 0) {
         buyerVisitsContainer.innerHTML = `
-          <div class="p-8 text-center bg-white rounded-3xl border border-border-light shadow-sm flex flex-col items-center justify-center gap-2">
+          <div class="p-8 text-center bg-white rounded-3xl border border-border-light shadow-sm">
             <span class="material-symbols-outlined text-[36px] text-on-surface-variant">map</span>
-            <h4 class="font-heading font-bold text-base text-primary">You haven't scheduled any field visits yet</h4>
-            <p class="text-xs text-on-surface-variant">Browse verified direct parcels and click "Schedule Field Visit" to inspect boundary pegs and soil directly with the farmer.</p>
-            <a href="#properties" class="mt-2 py-2 px-4 rounded-xl btn-primary-kinetic text-xs font-bold">Explore Lands</a>
+            <h4 class="font-heading font-bold text-base text-primary mt-2">No visit requests yet</h4>
+            <p class="text-xs text-on-surface-variant">Open a land and schedule a field visit. The landowner sees the request on their dashboard.</p>
+            <a href="#properties" class="inline-flex mt-4 py-2 px-4 rounded-xl btn-primary-kinetic text-xs font-bold">View properties</a>
           </div>
         `;
       } else {
-        buyerVisitsContainer.innerHTML = visits.map(v => {
-          const prop = this.properties.find(p => p.id === v.propertyId);
-          return `
-            <div class="p-4 rounded-2xl bg-white border border-border-light shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-surface-container text-primary">Visit #${v.id}</span>
-                <h4 class="font-heading font-bold text-sm text-primary mt-1">${prop ? prop.title : 'Direct Land Inspection'}</h4>
-                <p class="text-xs text-on-surface-variant">Scheduled for: <strong>${v.preferredDate || 'Pending'}</strong> • Status: <span class="font-bold text-secondary">${v.status || 'Scheduled'}</span></p>
-              </div>
-              ${prop ? `
-                <a href="tel:${prop.owner.phone.replace(/[^0-9]/g, '')}" class="py-2 px-3 rounded-xl btn-primary-kinetic text-xs font-bold flex items-center gap-1 self-start md:self-auto">
-                  <span class="material-symbols-outlined text-[15px]">call</span> Call Landowner Sri ${prop.owner.name.split(' ')[0]}
-                </a>
-              ` : ''}
+        buyerVisitsContainer.innerHTML = visits.map((visit) => `
+          <div class="p-4 rounded-2xl bg-white border border-border-light shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-surface-container text-primary">${this.escapeHtml(visit.status || 'Scheduled')}</span>
+              <h4 class="font-heading font-bold text-sm text-primary mt-1">${this.escapeHtml(visit.propertyTitle || 'Land inspection')}</h4>
+              <p class="text-xs text-on-surface-variant">Preferred date: <strong>${this.escapeHtml(visit.preferredDate || 'Pending')}</strong></p>
             </div>
-          `;
-        }).join('');
+          </div>
+        `).join('');
       }
     }
+
+    const allowed = isSeller ? ['listings', 'visits'] : ['saved', 'buyer-visits'];
+    if (!allowed.includes(this.currentDashTab)) this.currentDashTab = allowed[0];
+    this.switchDashTab(this.currentDashTab);
   }
 
-  deleteProperty(id) {
-    if (!confirm("Are you sure you want to delete this land listing from the marketplace?")) return;
-
-    this.properties = this.properties.filter(p => p.id !== id);
-
-    // Sync localStorage
+  async deleteProperty(id) {
+    if (!confirm("Delete this listing? Buyers will no longer see it.")) return;
     try {
-      const stored = localStorage.getItem('insightliker_custom_listings');
-      if (stored) {
-        const custom = JSON.parse(stored).filter(p => p.id !== id);
-        localStorage.setItem('insightliker_custom_listings', JSON.stringify(custom));
-      }
-    } catch (e) {}
-
-    // Sync to Node.js backend
-    if (typeof fetch !== 'undefined') {
-      fetch(`/api/properties/${id}`, { method: 'DELETE' }).catch(() => {});
+      const res = await fetch(`/api/properties/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: this.authHeaders()
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Could not delete this listing.');
+      this.properties = this.properties.filter((property) => property.id !== id);
+      this.showToast('Property listing deleted.');
+      this.renderDashboard();
+      if (this.currentView === 'properties') this.renderProperties();
+      if (this.currentView === 'home') this.renderHome();
+    } catch (err) {
+      this.showToast(err.message || 'Could not delete this listing.', 'error');
     }
-
-    // Sync to Cloud Firestore
-    if (window.firebaseAuth?.deletePropertyFromCloud) {
-      window.firebaseAuth.deletePropertyFromCloud(id);
-    }
-
-    this.showToast("Property listing deleted.");
-    this.renderDashboard();
-    if (this.currentView === 'properties') this.renderProperties();
   }
 
-  togglePropertyStatus(id) {
-    const prop = this.properties.find(p => p.id === id);
+  async togglePropertyStatus(id) {
+    const prop = this.properties.find((property) => property.id === id);
     if (!prop) return;
-
     const statuses = ['Available', 'Under Negotiation', 'Sold'];
     const currentIdx = statuses.indexOf(prop.listingStatus || 'Available');
     const nextStatus = statuses[(currentIdx + 1) % statuses.length];
-    prop.listingStatus = nextStatus;
-
-    // Sync localStorage
     try {
-      const stored = localStorage.getItem('insightliker_custom_listings');
-      if (stored) {
-        const custom = JSON.parse(stored).map(p => p.id === id ? { ...p, listingStatus: nextStatus } : p);
-        localStorage.setItem('insightliker_custom_listings', JSON.stringify(custom));
-      }
-    } catch (e) {}
-
-    // Sync Node.js backend
-    if (typeof fetch !== 'undefined') {
-      fetch(`/api/properties/${id}`, {
+      const res = await fetch(`/api/properties/${encodeURIComponent(id)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ listingStatus: nextStatus })
-      }).catch(() => {});
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Could not update this listing.');
+      this.upsertProperty(json.property);
+      this.showToast(`Property marked as ${nextStatus}.`);
+      this.renderDashboard();
+      if (this.currentView === 'properties') this.renderProperties();
+    } catch (err) {
+      this.showToast(err.message || 'Could not update this listing.', 'error');
     }
-
-    // Sync Cloud Firestore
-    if (window.firebaseAuth?.syncPropertyToCloud) {
-      window.firebaseAuth.syncPropertyToCloud(prop);
-    }
-
-    this.showToast(`Property marked as: ${nextStatus}`);
-    this.renderDashboard();
   }
 
   async updateVisitStatus(id, newStatus) {
     try {
-      const localVisits = JSON.parse(localStorage.getItem('insightliker_site_visits') || '[]')
-        .map(v => v.id === id ? { ...v, status: newStatus } : v);
-      localStorage.setItem('insightliker_site_visits', JSON.stringify(localVisits));
-    } catch (e) {}
-
-    if (typeof fetch !== 'undefined') {
-      try {
-        await fetch(`/api/site-visits/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: newStatus })
-        });
-      } catch (e) {}
+      const res = await fetch(`/api/site-visits/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: this.authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ status: newStatus })
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Could not update this visit.');
+      this.showToast(`Visit marked as ${newStatus}.`);
+      this.renderDashboard();
+    } catch (err) {
+      this.showToast(err.message || 'Could not update this visit.', 'error');
     }
-
-    this.showToast(`Visit appointment marked as: ${newStatus}`);
-    this.renderDashboard();
   }
 
   handleHeroSearch() {

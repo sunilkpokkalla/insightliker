@@ -122,16 +122,7 @@ class FirebaseAuthService {
   }
 
   loadPersistedSession() {
-    try {
-      const storedUser = localStorage.getItem('insightliker_current_user');
-      if (storedUser) {
-        this.currentUser = JSON.parse(storedUser);
-        this.currentRole = this.currentUser.role || this.currentRole || 'buyer';
-        this.notifyListeners();
-      }
-    } catch (e) {
-      console.warn('Error reading persisted auth session', e);
-    }
+    // Accounts are issued by the Node API. Browser storage is not a login.
   }
 
   persistSession(userData) {
