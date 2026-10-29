@@ -57,15 +57,15 @@
 <body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col font-sans selection:bg-secondary-container selection:text-secondary">
 
   <!-- Top Announcement / Trust Banner -->
-  <div class="bg-primary text-tertiary-fixed text-[11px] md:text-xs py-1.5 px-4 font-semibold tracking-wide border-b border-white/10 flex items-center justify-between">
-    <div class="container mx-auto flex items-center justify-between flex-wrap gap-2">
-      <div class="flex items-center gap-2">
-        <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-tertiary-fixed text-tertiary font-bold text-[10px]">VERIFIED 2026</span>
-        <span data-i18n="trustBanner">100% Direct Owners Only • Zero Brokerage & Zero Middlemen Guarantee</span>
+  <div class="bg-primary text-tertiary-fixed text-[11px] md:text-xs py-1.5 font-semibold tracking-wide border-b border-white/10">
+    <div class="mx-auto w-full max-w-[1440px] px-4 lg:px-6 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-tertiary-fixed text-tertiary font-bold text-[10px] leading-none shrink-0">VERIFIED 2026</span>
+        <span class="truncate" data-i18n="trustBanner">100% Direct Owners Only • Zero Brokerage & Zero Middlemen Guarantee</span>
       </div>
-      <div class="hidden sm:flex items-center gap-4 text-white/80">
-        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-tertiary-fixed">gavel</span> Dharani • Bhoomi • Meebhoomi Verified</span>
-        <button onclick="app.openUnitConverter()" class="hover:text-tertiary-fixed transition-colors flex items-center gap-1 font-bold">
+      <div class="hidden md:flex items-center gap-4 text-white/85 shrink-0 whitespace-nowrap">
+        <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-tertiary-fixed">gavel</span> Dharani • Bhoomi • Meebhoomi Verified</span>
+        <button onclick="app.openUnitConverter()" class="hover:text-tertiary-fixed transition-colors inline-flex items-center gap-1 font-bold">
           <span class="material-symbols-outlined text-[14px]">calculate</span> <span data-i18n="calcLink">Land Unit Calculator</span>
         </button>
       </div>
@@ -74,45 +74,42 @@
 
   <!-- Main Navigation Bar -->
   <header class="sticky top-0 z-40 glass-nav">
-    <div class="mx-auto max-w-[1440px] px-4 h-16 flex items-center gap-3">
+    <div class="header-bar mx-auto max-w-[1440px] px-4 lg:px-6 h-16">
       
       <!-- Brand Logo -->
-      <a href="#home" class="flex items-center gap-2.5 shrink-0 group">
-        <div class="w-10 h-10 rounded-xl bg-primary-container text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+      <a href="#home" class="inline-flex items-center gap-2.5 shrink-0 group">
+        <div class="w-10 h-10 rounded-xl bg-primary-container text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
           <span class="material-symbols-outlined text-[22px] text-tertiary-fixed">landscape</span>
         </div>
         <div class="flex flex-col justify-center leading-none">
-          <span class="font-heading font-extrabold text-base text-primary tracking-tight flex items-center gap-1.5">
+          <span class="font-heading font-extrabold text-base text-primary tracking-tight inline-flex items-center gap-1.5 whitespace-nowrap">
             InSightLiker <span class="text-secondary font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-surface-container border border-secondary-container leading-none">Real Land</span>
           </span>
-          <span class="text-[10px] font-semibold text-secondary mt-1 leading-none">South India Direct Marketplace</span>
+          <span class="text-[10px] font-semibold text-secondary mt-1 leading-none whitespace-nowrap">South India Direct Marketplace</span>
         </div>
       </a>
 
-      <!-- Navigation Links -->
-      <nav class="hidden lg:flex items-center justify-center gap-0.5 flex-1 min-w-0 h-full">
-        <a href="#home" data-nav-target="home" class="header-link"><span data-i18n="navHome">Home</span></a>
+      <!-- Primary Public Navigation Links -->
+      <nav class="header-nav hidden lg:flex items-center justify-center gap-1">
+        <a href="#home" data-nav-target="home" class="header-link">
+          <span data-i18n="navHome">Home</span>
+        </a>
         <a href="#properties" data-nav-target="properties" class="header-link">
-          <span data-i18n="navExplore">Explore</span>
+          <span data-i18n="navExplore">Explore Lands</span>
           <span class="w-1.5 h-1.5 rounded-full bg-secondary shrink-0"></span>
         </a>
-        <a href="#list-property" data-nav-target="list-property" class="header-link text-secondary font-semibold">
+        <a href="#list-property" id="navListPropertyLink" data-nav-target="list-property" class="header-link text-secondary font-semibold">
           <span class="material-symbols-outlined text-[18px] leading-none">add_circle</span>
-          <span data-i18n="navListFree">List free</span>
-        </a>
-        <a href="#dashboard" data-nav-target="dashboard" class="header-link"><span data-i18n="navDashboard">Dashboard</span></a>
-        <a href="#saved" data-nav-target="saved" class="header-link">
-          <span data-i18n="navSaved">Saved</span>
-          <span id="savedNavBadge" class="hidden px-1.5 rounded-full bg-secondary text-white text-[10px] font-bold leading-4">0</span>
+          <span data-i18n="navListFree">List Free</span>
         </a>
       </nav>
 
-      <!-- Right Header Actions (Auth & Controls) -->
-      <div class="flex items-center gap-2 shrink-0 ml-auto h-full">
+      <!-- Right Header Actions (Filters, Tools & Account) -->
+      <div class="header-actions flex items-center gap-2">
 
-        <div class="hidden xl:flex header-chip">
-          <span class="material-symbols-outlined text-[16px] text-primary">pin_drop</span>
-          <select id="headerStateSelect" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer max-w-[9.5rem]">
+        <div class="hidden xl:inline-flex header-chip">
+          <span class="material-symbols-outlined text-[16px] text-primary leading-none">pin_drop</span>
+          <select id="headerStateSelect" aria-label="Select State" class="bg-transparent text-xs font-bold text-primary leading-none focus:outline-none cursor-pointer max-w-[9.5rem]">
             <option value="all">All South India</option>
             <option value="Telangana">Telangana</option>
             <option value="Karnataka">Karnataka</option>
@@ -122,9 +119,9 @@
           </select>
         </div>
 
-        <div class="hidden sm:flex header-chip">
-          <span class="material-symbols-outlined text-[16px] text-primary">translate</span>
-          <select id="headerLangSelect" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer">
+        <div class="hidden sm:inline-flex header-chip">
+          <span class="material-symbols-outlined text-[16px] text-primary leading-none">translate</span>
+          <select id="headerLangSelect" aria-label="Select Language" class="bg-transparent text-xs font-bold text-primary leading-none focus:outline-none cursor-pointer">
             <option value="en">English</option>
             <option value="te">తెలుగు</option>
             <option value="kn">ಕನ್ನಡ</option>
@@ -134,35 +131,34 @@
         </div>
         
         <!-- Unit Converter Button -->
-        <button id="unitConverterBtn" class="hidden md:inline-flex items-center gap-1 h-9 px-3 rounded-full border border-border-light bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-primary whitespace-nowrap" title="Convert Acres, Guntas, Cents, Sq.Yards">
-          <span class="material-symbols-outlined text-[16px]">calculate</span>
+        <button id="unitConverterBtn" class="hidden md:inline-flex header-pill-btn" title="Convert Acres, Guntas, Cents, Sq.Yards">
+          <span class="material-symbols-outlined text-[16px] leading-none">calculate</span>
           <span data-i18n="navConverter">Converter</span>
         </button>
 
-        <!-- Firebase Authentication Section in Header -->
-        <div id="authHeaderContainer" class="relative">
+        <!-- Authentication Section in Header -->
+        <div id="authHeaderContainer" class="relative flex items-center">
           
           <!-- State 1: Unauthenticated -->
-          <button id="authNavBtn" onclick="app.openAuthModal('signin')" class="py-2 px-3.5 rounded-xl btn-primary-kinetic text-xs md:text-sm font-bold flex items-center gap-1.5 shadow-sm">
-            <span class="material-symbols-outlined text-[18px]">account_circle</span>
-            <span class="hidden sm:inline" data-i18n="navSignIn">Sign In / Register</span>
-            <span class="sm:hidden">Sign In</span>
+          <button id="authNavBtn" onclick="app.openAuthModal('signin')" class="header-cta-btn btn-primary-kinetic shadow-sm">
+            <span class="material-symbols-outlined text-[18px] leading-none">account_circle</span>
+            <span data-i18n="navSignIn">Sign In</span>
           </button>
 
           <!-- State 2: Authenticated User Pill (Hidden by default) -->
           <div id="authNavUser" class="hidden relative">
-            <button onclick="app.toggleUserMenu()" class="flex items-center gap-2 h-9 px-2.5 rounded-full bg-surface-container-high border border-border-light hover:border-primary whitespace-nowrap">
-              <div id="authUserAvatar" class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-sm overflow-hidden">
+            <button onclick="app.toggleUserMenu()" class="inline-flex items-center gap-2 h-9 pl-1.5 pr-2.5 rounded-full bg-surface-container-high border border-border-light hover:border-primary whitespace-nowrap transition-colors">
+              <div id="authUserAvatar" class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-sm overflow-hidden shrink-0">
                 U
               </div>
-              <div class="hidden sm:flex flex-col text-left">
-                <span id="authUserName" class="text-xs font-bold text-primary truncate max-w-[120px]">User</span>
-                <span id="authUserRoleBadge" class="text-[9px] font-semibold text-secondary uppercase tracking-wider leading-none">Buyer</span>
+              <div class="hidden sm:flex flex-col text-left leading-none">
+                <span id="authUserName" class="text-xs font-bold text-primary truncate max-w-[110px]">User</span>
+                <span id="authUserRoleBadge" class="text-[9px] font-semibold text-secondary uppercase tracking-wider leading-none mt-0.5">Buyer</span>
               </div>
-              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">expand_more</span>
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant leading-none">expand_more</span>
             </button>
 
-            <!-- User Dropdown Menu -->
+            <!-- User Dropdown Menu (Account-Only Views: Dashboard, Saved, Listings) -->
             <div id="authUserDropdown" class="hidden absolute right-0 mt-2 w-64 bg-surface-container-lowest rounded-2xl shadow-xl border border-border-light py-2 z-50 animate-fadeIn">
               <div class="px-4 py-2 border-b border-border-light">
                 <p id="dropdownUserEmail" class="text-xs text-on-surface-variant truncate">user@example.com</p>
@@ -172,19 +168,20 @@
               </div>
 
               <div class="py-1">
-                <a href="#dashboard" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors">
+                <a href="#dashboard" onclick="document.getElementById('authUserDropdown').classList.add('hidden')" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors">
                   <span class="material-symbols-outlined text-[18px] text-primary">dashboard</span>
-                  <span>Dashboard & Inquiries</span>
+                  <span data-i18n="navDashboard">Dashboard</span>
                 </a>
-                <a href="#list-property" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors">
+                <a href="#saved" onclick="document.getElementById('authUserDropdown').classList.add('hidden')" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors">
+                  <span class="material-symbols-outlined text-[18px] text-primary">bookmark</span>
+                  <span data-i18n="navSaved">Saved Lands</span>
+                  <span id="savedNavBadge" class="hidden ml-auto px-1.5 py-0.5 rounded-full bg-secondary text-white text-[10px] font-bold leading-none">0</span>
+                </a>
+                <a href="#list-property" id="dropdownListLandLink" onclick="document.getElementById('authUserDropdown').classList.add('hidden')" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors">
                   <span class="material-symbols-outlined text-[18px] text-secondary">add_business</span>
                   <span>List New Land (Free)</span>
                 </a>
-                <a href="#saved" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors">
-                  <span class="material-symbols-outlined text-[18px] text-primary">bookmark</span>
-                  <span>My Saved Properties</span>
-                </a>
-                <button onclick="app.openFirebaseConfigModal()" class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors text-left">
+                <button onclick="app.openFirebaseConfigModal(); document.getElementById('authUserDropdown').classList.add('hidden')" class="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors text-left">
                   <span class="material-symbols-outlined text-[18px] text-amber-600">settings</span>
                   <span>Firebase Keys & Status</span>
                 </button>
@@ -202,8 +199,8 @@
         </div>
 
         <!-- Mobile Drawer Hamburger Toggle -->
-        <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" title="Toggle Navigation">
-          <span class="material-symbols-outlined text-[24px]">menu</span>
+        <button id="mobileMenuBtn" class="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors shrink-0" title="Toggle Navigation">
+          <span class="material-symbols-outlined text-[22px] leading-none">menu</span>
         </button>
       </div>
 
@@ -259,10 +256,10 @@
           <a href="#list-property" onclick="document.getElementById('mobileDrawer').classList.add('hidden')" class="mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-secondary font-bold">
             <span class="material-symbols-outlined text-[20px]">add_box</span> <span data-i18n="navListFree">List Your Land Free (0%)</span>
           </a>
-          <a href="#dashboard" onclick="document.getElementById('mobileDrawer').classList.add('hidden')" class="mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-primary font-bold">
-            <span class="material-symbols-outlined text-[20px]">dashboard</span> <span data-i18n="navDashboard">Dashboard & Inquiries</span>
+          <a href="#dashboard" data-auth-only data-nav-target="dashboard" onclick="document.getElementById('mobileDrawer').classList.add('hidden'); document.body.style.overflow = ''" class="hidden mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-primary font-bold">
+            <span class="material-symbols-outlined text-[20px]">dashboard</span> <span data-i18n="navDashboard">Dashboard</span>
           </a>
-          <a href="#saved" onclick="document.getElementById('mobileDrawer').classList.add('hidden')" class="mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-on-surface-variant">
+          <a href="#saved" data-auth-only data-nav-target="saved" onclick="document.getElementById('mobileDrawer').classList.add('hidden'); document.body.style.overflow = ''" class="hidden mobile-nav-item py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-on-surface-variant">
             <span class="material-symbols-outlined text-[20px]">bookmark</span> <span data-i18n="navSaved">Saved Lands</span>
           </a>
           <button onclick="app.openUnitConverter(); document.getElementById('mobileDrawer').classList.add('hidden')" class="py-2 px-3 rounded-lg hover:bg-surface-container flex items-center gap-3 text-on-surface-variant text-left">

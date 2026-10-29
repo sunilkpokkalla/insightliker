@@ -629,12 +629,12 @@ const TRANSLATIONS = {
     trustBanner: "100% Direct Owners Only • Zero Brokerage & Zero Middlemen Guarantee",
     calcLink: "Land Area Calculator",
     navHome: "Home",
-    navExplore: "Explore",
-    navListFree: "List free",
+    navExplore: "Explore Lands",
+    navListFree: "List Free",
     navDashboard: "Dashboard",
-    navSaved: "Saved",
+    navSaved: "Saved Lands",
     navConverter: "Converter",
-    navSignIn: "Sign In / Register",
+    navSignIn: "Sign In",
     navSignOut: "Sign Out",
     heroTrustPill: "Zero Brokerage • 100% Direct Landowners Only",
     heroTitle: 'South India\'s Direct <br class="hidden sm:inline"><span class="text-transparent bg-clip-text bg-gradient-to-r from-tertiary-fixed via-secondary-container to-white">Land & Acreage Marketplace</span>',
@@ -712,7 +712,7 @@ const TRANSLATIONS = {
     navDashboard: "డాష్‌బోర్డ్",
     navSaved: "సేవ్",
     navConverter: "కాలిక్యులేటర్",
-    navSignIn: "సైన్ ఇన్ / రిజిస్టర్",
+    navSignIn: "సైన్ ఇన్",
     navSignOut: "లాగ్ అవుట్",
     heroTrustPill: "జీరో బ్రోకరేజ్ • 100% నేరుగా భూయజమానులు మాత్రమే",
     heroTitle: 'దక్షిణ భారతదేశపు నేరుగా <br class="hidden sm:inline"><span class="text-transparent bg-clip-text bg-gradient-to-r from-tertiary-fixed via-secondary-container to-white">భూములు & ఎకరాల మార్కెట్‌ప్లేస్</span>',
@@ -790,7 +790,7 @@ const TRANSLATIONS = {
     navDashboard: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     navSaved: "ಉಳಿಸಿದವು",
     navConverter: "ಕ್ಯಾಲ್ಕುಲೇಟರ್",
-    navSignIn: "ಸೈನ್ ಇನ್ / ನೋಂದಣಿ",
+    navSignIn: "ಸೈನ್ ಇನ್",
     navSignOut: "ಸೈನ್ ಔಟ್",
     heroTrustPill: "ಶೂನ್ಯ ದಲ್ಲಾಳಿ • 100% ನೇರ ಭೂ ಮಾಲೀಕರು ಮಾತ್ರ",
     heroTitle: 'ದಕ್ಷಿಣ ಭಾರತದ ನೇರ <br class="hidden sm:inline"><span class="text-transparent bg-clip-text bg-gradient-to-r from-tertiary-fixed via-secondary-container to-white">ಭೂಮಿ ಮತ್ತು ಎಕರೆ ಮಾರುಕಟ್ಟೆ</span>',
@@ -868,7 +868,7 @@ const TRANSLATIONS = {
     navDashboard: "டாஷ்போர்டு",
     navSaved: "சேமித்தவை",
     navConverter: "பரப்பளவு மாற்றி",
-    navSignIn: "உள்நுழை / பதிவு செய்",
+    navSignIn: "உள்நுழை",
     navSignOut: "வெளியேறு",
     heroTrustPill: "பூஜ்ஜிய தரகு • 100% நேரடி உரிமையாளர்கள் மட்டும்",
     heroTitle: 'தென்னிந்தியாவின் நேரடி <br class="hidden sm:inline"><span class="text-transparent bg-clip-text bg-gradient-to-r from-tertiary-fixed via-secondary-container to-white">நிலங்கள் மற்றும் ஏக்கர் சந்தை</span>',
@@ -946,7 +946,7 @@ const TRANSLATIONS = {
     navDashboard: "ഡാഷ്‌ബോർഡ്",
     navSaved: "സേവ് ചെയ്തവ",
     navConverter: "കാൽക്കുലേറ്റർ",
-    navSignIn: "സൈൻ ഇൻ / രജിസ്റ്റർ",
+    navSignIn: "സൈൻ ഇൻ",
     navSignOut: "ലോഗ് ഔട്ട്",
     heroTrustPill: "പൂജ്യം ബ്രോക്കറേജ് • 100% നേരിട്ടുള്ള ഭൂവുടമകൾ മാത്രം",
     heroTitle: 'ദക്ഷിണേന്ത്യയിലെ നേരിട്ടുള്ള <br class="hidden sm:inline"><span class="text-transparent bg-clip-text bg-gradient-to-r from-tertiary-fixed via-secondary-container to-white">ഭൂമി & ഏക്കർ വിപണി</span>',
@@ -1177,6 +1177,7 @@ class LandApp {
   init() {
     this.setupRouter();
     this.setupGlobalListeners();
+    this.onAuthStateChange(this.account);
     this.initAuth();
     
     // Load persisted language or default to en
@@ -2638,6 +2639,15 @@ class LandApp {
     if (listGuestBlock) listGuestBlock.classList.toggle('hidden', !!user);
     if (listBuyerBlock) listBuyerBlock.classList.toggle('hidden', role !== 'buyer');
     if (listSellerWorkspace) listSellerWorkspace.classList.toggle('hidden', role !== 'seller');
+
+    // Show account-only links (Dashboard / Saved) only when authenticated
+    document.querySelectorAll('[data-auth-only]').forEach((el) => {
+      el.classList.toggle('hidden', !user);
+    });
+    const dropdownListLandLink = document.getElementById('dropdownListLandLink');
+    if (dropdownListLandLink) {
+      dropdownListLandLink.classList.toggle('hidden', role === 'buyer');
+    }
 
     if (user) {
       const displayName = user.displayName || user.email.split('@')[0];
