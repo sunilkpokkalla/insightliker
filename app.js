@@ -2856,7 +2856,26 @@ class LandApp {
       else if (this.currentView === 'dashboard') this.renderDashboard();
     } catch (err) {
       if (errorEl) {
-        errorEl.textContent = err.message || "Google Sign-In failed.";
+        if (err.code === 'auth/unauthorized-domain' || err.message?.includes('Authorized Domain')) {
+          const domain = window.location.hostname || 'your domain';
+          errorEl.innerHTML = `
+            <div class="flex flex-col gap-2 text-left">
+              <div class="font-bold flex items-center gap-1.5 text-red-800">
+                <span class="material-symbols-outlined text-[16px]">domain_disabled</span>
+                <span>Domain Not Authorized in Firebase</span>
+              </div>
+              <p class="text-[11px] text-red-700 leading-relaxed">
+                Google requires domain verification for security. Please add <strong class="bg-red-100 px-1 py-0.5 rounded font-mono text-red-900">${domain}</strong> to your authorized domains in Firebase.
+              </p>
+              <a href="https://console.firebase.google.com/project/insightliker/authentication/settings" target="_blank" rel="noopener noreferrer" class="mt-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-red-600 text-white font-bold text-xs hover:bg-red-700 transition-colors shadow-sm">
+                <span>Add Domain in Firebase Console</span>
+                <span class="material-symbols-outlined text-[15px]">open_in_new</span>
+              </a>
+            </div>
+          `;
+        } else {
+          errorEl.textContent = err.message || "Google Sign-In failed.";
+        }
         errorEl.classList.remove('hidden');
       }
     } finally {

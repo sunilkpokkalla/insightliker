@@ -250,7 +250,11 @@ class FirebaseAuthService {
       } catch (err) {
         console.warn('Live Google Sign-In popup notice:', err.code, err.message);
         if (err.code === 'auth/unauthorized-domain') {
-          throw new Error('Authorized Domain Required: Please add this domain or localhost in Firebase Console > Authentication > Settings > Authorized Domains.');
+          const currentHost = (typeof window !== 'undefined' && window.location?.hostname) ? window.location.hostname : 'this domain';
+          const error = new Error(`Domain "${currentHost}" is not authorized. Please add "${currentHost}" in Firebase Console > Authentication > Settings > Authorized Domains.`);
+          error.code = 'auth/unauthorized-domain';
+          error.domain = currentHost;
+          throw error;
         }
         throw err;
       }
