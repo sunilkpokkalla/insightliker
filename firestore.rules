@@ -1,0 +1,398 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Models
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId} (matches request.auth.uid)
+    // Fields:
+    //   - id: string (required, immutable, 1..64 chars, equals userId)
+    //   - name: string (required, 1..100 chars)
+    //   - email: string (required, valid email, 5..100 chars)
+    //   - phone: string (optional, 0..25 chars)
+    //   - role: string (required, 'buyer' or 'seller')
+    //   - createdAt: string | timestamp (required, immutable)
+    //   - photoURL: string (optional, <= 1000 chars)
+    //   - isVerified: bool (optional)
+    //   - provider: string (optional, <= 50 chars)
+    //   - updatedAt: string | timestamp (optional)
+    //
+    // Collection: properties
+    // Document ID: {propertyId}
+    // Fields:
+    //   - id: string (required, immutable, 1..100 chars)
+    //   - title: string (required, 1..300 chars)
+    //   - state: string (required, 1..100 chars)
+    //   - district: string (required, 1..100 chars)
+    //   - priceTotalNum: number (required, > 0)
+    //   - pricePerUnit: string (required, 1..100 chars)
+    //   - category: string (required, 1..100 chars)
+    //   - ownerUid: string (required, immutable, 1..100 chars, equals request.auth.uid)
+    //   - owner: map (required, contains name, phone, etc.)
+    //   - listingStatus: string (required, 'Available' | 'Under Negotiation' | 'Sold')
+    //   - area: string (optional, <= 100 chars)
+    //   - extent: string (optional, <= 100 chars)
+    //   - extentNum: number (optional)
+    //   - unitType: string (optional, <= 50 chars)
+    //   - priceDisplay: string (optional, <= 100 chars)
+    //   - tagline: string (optional, <= 300 chars)
+    //   - corridor: string (optional, <= 150 chars)
+    //   - village: string (optional, <= 150 chars)
+    //   - roadAccess: string (optional, <= 150 chars)
+    //   - roadWidth: number (optional)
+    //   - waterSource: string (optional, <= 200 chars)
+    //   - soilType: string (optional, <= 200 chars)
+    //   - electricity: string (optional, <= 200 chars)
+    //   - fencing: string (optional, <= 200 chars)
+    //   - titleStatus: string (optional, <= 200 chars)
+    //   - surveyNo: string (optional, <= 150 chars)
+    //   - govtPortal: string (optional, <= 200 chars)
+    //   - govtPortalUrl: string (optional, <= 500 chars)
+    //   - conversionStatus: string (optional, <= 150 chars)
+    //   - suitableFor: string (optional, <= 300 chars)
+    //   - featured: bool (optional)
+    //   - catalog: bool (optional)
+    //   - contactLocked: bool (optional)
+    //   - images: list (optional, <= 20 items)
+    //   - coordinates: list (optional, <= 4 items)
+    //   - description: string (optional, <= 5000 chars)
+    //   - documents: list (optional, <= 20 items)
+    //   - createdAt: string | timestamp (optional, immutable)
+    //   - updatedAt: string | timestamp (optional)
+    //
+    // Collection: site_visits
+    // Document ID: {visitId}
+    // Fields:
+    //   - id: string (required, immutable, 1..100 chars)
+    //   - propertyId: string (required, immutable, 1..100 chars)
+    //   - propertyTitle: string (required, 1..300 chars)
+    //   - buyerId: string (required, immutable, 1..100 chars, equals request.auth.uid)
+    //   - buyerName: string (required, 1..100 chars)
+    //   - buyerEmail: string (required, immutable, valid email, 5..100 chars)
+    //   - phone: string (required, immutable, 7..25 chars)
+    //   - preferredDate: string (required, 0..100 chars)
+    //   - status: string (required, 'Scheduled' | 'Confirmed' | 'Completed' | 'Cancelled')
+    //   - timestamp: string | timestamp (required, immutable)
+    //   - propertyOwnerUid: string (optional, 1..100 chars)
+    //   - allowedUids: list (optional, <= 10 items)
+    //   - notes: string (optional, <= 2000 chars)
+    //   - updatedAt: string | timestamp (optional)
+    //
+    // Collection: broker_reports
+    // Document ID: {reportId}
+    // Fields:
+    //   - id: string (required, immutable, 1..100 chars)
+    //   - status: string (required, 'Under Investigation' | 'Verified Violation' | 'Resolved' | 'Dismissed')
+    //   - brokerPhone: string (required, 5..30 chars)
+    //   - demandDetails: string (required, 1..3000 chars)
+    //   - reporterContact: string (required, 0..100 chars)
+    //   - timestamp: string | timestamp (required, immutable)
+    //   - reporterId: string | null (optional, immutable)
+    //   - adminNotes: string (optional, <= 2000 chars)
+    //   - updatedAt: string | timestamp (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Standard Helper Functions
+    // ===============================================================
+
+    // Check if the request is from an authenticated user
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if user is the resource owner by UID
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Check if the authenticated user holds an admin custom claim
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    // Validate email format
+    function isValidEmail(email) {
+      return email is string &&
+        email.size() >= 5 &&
+        email.size() <= 100 &&
+        email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    // Validate that immutable fields have not been altered on update
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    // 1. User Profile Validator
+    function isValidUser(data) {
+      let allowedKeys = [
+        'id', 'name', 'email', 'phone', 'role',
+        'createdAt', 'photoURL', 'isVerified', 'provider', 'updatedAt'
+      ];
+
+      let hasRequired = data.id is string && data.id.size() >= 1 && data.id.size() <= 64 &&
+                        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+                        data.email is string && isValidEmail(data.email) &&
+                        data.role is string && (data.role == 'buyer' || data.role == 'seller') &&
+                        (!('createdAt' in data) || data.createdAt is string || data.createdAt is timestamp);
+
+      let hasValidOptional = (!('phone' in data) || (data.phone is string && data.phone.size() <= 25)) &&
+                             (!('photoURL' in data) || data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 1000)) &&
+                             (!('isVerified' in data) || data.isVerified is bool) &&
+                             (!('provider' in data) || (data.provider is string && data.provider.size() <= 50)) &&
+                             (!('updatedAt' in data) || data.updatedAt is string || data.updatedAt is timestamp);
+
+      return data.keys().hasOnly(allowedKeys) && hasRequired && hasValidOptional;
+    }
+
+    // 2. Property Owner Submap Validator
+    function isValidOwnerMap(m) {
+      return m is map &&
+             m.keys().hasAll(['name', 'phone']) &&
+             m.name is string && m.name.size() >= 1 && m.name.size() <= 100 &&
+             m.phone is string && m.phone.size() <= 30 &&
+             (!('phoneDisplay' in m) || (m.phoneDisplay is string && m.phoneDisplay.size() <= 40)) &&
+             (!('whatsapp' in m) || (m.whatsapp is string && m.whatsapp.size() <= 30)) &&
+             (!('type' in m) || (m.type is string && m.type.size() <= 100)) &&
+             (!('residence' in m) || (m.residence is string && m.residence.size() <= 150)) &&
+             (!('ownershipYears' in m) || (m.ownershipYears is string && m.ownershipYears.size() <= 100)) &&
+             (!('verificationDate' in m) || (m.verificationDate is string && m.verificationDate.size() <= 100)) &&
+             (!('avatarInitials' in m) || (m.avatarInitials is string && m.avatarInitials.size() <= 10));
+    }
+
+    // 3. Property Listing Validator
+    function isValidProperty(data) {
+      let allowedKeys = [
+        'id', 'title', 'state', 'district', 'priceTotalNum', 'pricePerUnit',
+        'area', 'extent', 'extentNum', 'unitType', 'priceDisplay',
+        'category', 'tagline', 'corridor', 'village', 'roadAccess', 'roadWidth',
+        'waterSource', 'soilType', 'electricity', 'fencing', 'titleStatus',
+        'surveyNo', 'govtPortal', 'govtPortalUrl', 'conversionStatus', 'suitableFor',
+        'featured', 'catalog', 'contactLocked', 'images', 'coordinates',
+        'description', 'documents', 'owner', 'ownerUid', 'listingStatus',
+        'createdAt', 'updatedAt'
+      ];
+
+      let hasRequired = data.id is string && data.id.size() >= 1 && data.id.size() <= 100 &&
+                        data.title is string && data.title.size() >= 1 && data.title.size() <= 300 &&
+                        data.state is string && data.state.size() >= 1 && data.state.size() <= 100 &&
+                        data.district is string && data.district.size() >= 1 && data.district.size() <= 100 &&
+                        (data.priceTotalNum is int || data.priceTotalNum is float) && data.priceTotalNum > 0 &&
+                        data.pricePerUnit is string && data.pricePerUnit.size() >= 1 && data.pricePerUnit.size() <= 100 &&
+                        data.category is string && data.category.size() >= 1 && data.category.size() <= 100 &&
+                        data.ownerUid is string && data.ownerUid.size() >= 1 && data.ownerUid.size() <= 100 &&
+                        data.listingStatus is string && data.listingStatus in ['Available', 'Under Negotiation', 'Sold'] &&
+                        isValidOwnerMap(data.owner);
+
+      let hasValidOptional = (!('area' in data) || (data.area is string && data.area.size() <= 100)) &&
+                             (!('extent' in data) || (data.extent is string && data.extent.size() <= 100)) &&
+                             (!('extentNum' in data) || data.extentNum is int || data.extentNum is float) &&
+                             (!('unitType' in data) || (data.unitType is string && data.unitType.size() <= 50)) &&
+                             (!('priceDisplay' in data) || (data.priceDisplay is string && data.priceDisplay.size() <= 100)) &&
+                             (!('tagline' in data) || (data.tagline is string && data.tagline.size() <= 300)) &&
+                             (!('corridor' in data) || (data.corridor is string && data.corridor.size() <= 150)) &&
+                             (!('village' in data) || (data.village is string && data.village.size() <= 150)) &&
+                             (!('roadAccess' in data) || (data.roadAccess is string && data.roadAccess.size() <= 150)) &&
+                             (!('roadWidth' in data) || data.roadWidth is int || data.roadWidth is float) &&
+                             (!('waterSource' in data) || (data.waterSource is string && data.waterSource.size() <= 200)) &&
+                             (!('soilType' in data) || (data.soilType is string && data.soilType.size() <= 200)) &&
+                             (!('electricity' in data) || (data.electricity is string && data.electricity.size() <= 200)) &&
+                             (!('fencing' in data) || (data.fencing is string && data.fencing.size() <= 200)) &&
+                             (!('titleStatus' in data) || (data.titleStatus is string && data.titleStatus.size() <= 200)) &&
+                             (!('surveyNo' in data) || (data.surveyNo is string && data.surveyNo.size() <= 150)) &&
+                             (!('govtPortal' in data) || (data.govtPortal is string && data.govtPortal.size() <= 200)) &&
+                             (!('govtPortalUrl' in data) || (data.govtPortalUrl is string && data.govtPortalUrl.size() <= 500)) &&
+                             (!('conversionStatus' in data) || (data.conversionStatus is string && data.conversionStatus.size() <= 150)) &&
+                             (!('suitableFor' in data) || (data.suitableFor is string && data.suitableFor.size() <= 300)) &&
+                             (!('featured' in data) || data.featured is bool) &&
+                             (!('catalog' in data) || data.catalog is bool) &&
+                             (!('contactLocked' in data) || data.contactLocked is bool) &&
+                             (!('images' in data) || (data.images is list && data.images.size() <= 20)) &&
+                             (!('coordinates' in data) || (data.coordinates is list && data.coordinates.size() <= 4)) &&
+                             (!('description' in data) || (data.description is string && data.description.size() <= 5000)) &&
+                             (!('documents' in data) || (data.documents is list && data.documents.size() <= 20)) &&
+                             (!('createdAt' in data) || data.createdAt is string || data.createdAt is timestamp) &&
+                             (!('updatedAt' in data) || data.updatedAt is string || data.updatedAt is timestamp);
+
+      return data.keys().hasOnly(allowedKeys) && hasRequired && hasValidOptional;
+    }
+
+    // 4. Site Visit Booking Validator
+    function isValidSiteVisit(data) {
+      let allowedKeys = [
+        'id', 'propertyId', 'propertyTitle', 'buyerId', 'buyerName',
+        'buyerEmail', 'phone', 'preferredDate', 'status', 'timestamp',
+        'propertyOwnerUid', 'allowedUids', 'notes', 'updatedAt'
+      ];
+
+      let hasRequired = data.id is string && data.id.size() >= 1 && data.id.size() <= 100 &&
+                        data.propertyId is string && data.propertyId.size() >= 1 && data.propertyId.size() <= 100 &&
+                        data.propertyTitle is string && data.propertyTitle.size() >= 1 && data.propertyTitle.size() <= 300 &&
+                        data.buyerId is string && data.buyerId.size() >= 1 && data.buyerId.size() <= 100 &&
+                        data.buyerName is string && data.buyerName.size() >= 1 && data.buyerName.size() <= 100 &&
+                        data.buyerEmail is string && isValidEmail(data.buyerEmail) &&
+                        data.phone is string && data.phone.size() >= 7 && data.phone.size() <= 25 &&
+                        data.preferredDate is string && data.preferredDate.size() <= 100 &&
+                        data.status is string && data.status in ['Scheduled', 'Confirmed', 'Completed', 'Cancelled'] &&
+                        (!('timestamp' in data) || data.timestamp is string || data.timestamp is timestamp);
+
+      let hasValidOptional = (!('propertyOwnerUid' in data) || (data.propertyOwnerUid is string && data.propertyOwnerUid.size() <= 100)) &&
+                             (!('allowedUids' in data) || (data.allowedUids is list && data.allowedUids.size() <= 10)) &&
+                             (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000)) &&
+                             (!('updatedAt' in data) || data.updatedAt is string || data.updatedAt is timestamp);
+
+      return data.keys().hasOnly(allowedKeys) && hasRequired && hasValidOptional;
+    }
+
+    // 5. Broker Report Validator
+    function isValidBrokerReport(data) {
+      let allowedKeys = [
+        'id', 'timestamp', 'status', 'reporterId',
+        'brokerPhone', 'demandDetails', 'reporterContact', 'adminNotes', 'updatedAt'
+      ];
+
+      let hasRequired = data.id is string && data.id.size() >= 1 && data.id.size() <= 100 &&
+                        data.status is string && data.status in ['Under Investigation', 'Verified Violation', 'Resolved', 'Dismissed'] &&
+                        data.brokerPhone is string && data.brokerPhone.size() >= 5 && data.brokerPhone.size() <= 30 &&
+                        data.demandDetails is string && data.demandDetails.size() >= 1 && data.demandDetails.size() <= 3000 &&
+                        data.reporterContact is string && data.reporterContact.size() <= 100 &&
+                        (!('timestamp' in data) || data.timestamp is string || data.timestamp is timestamp);
+
+      let hasValidOptional = (!('reporterId' in data) || data.reporterId == null || (data.reporterId is string && data.reporterId.size() <= 100)) &&
+                             (!('adminNotes' in data) || (data.adminNotes is string && data.adminNotes.size() <= 2000)) &&
+                             (!('updatedAt' in data) || data.updatedAt is string || data.updatedAt is timestamp);
+
+      return data.keys().hasOnly(allowedKeys) && hasRequired && hasValidOptional;
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    // 1. Users Collection
+    // Each user has their own private profile. Sensitive PII (email, phone)
+    // is never accessible to other regular users.
+    match /users/{userId} {
+      // User can only read their own profile (or admin)
+      allow read: if isOwner(userId) || isAdmin();
+
+      // Creation allowed if caller is the authenticated user creating their own document
+      allow create: if isOwner(userId) &&
+                       request.resource.data.id == userId &&
+                       isValidUser(request.resource.data);
+
+      // Updates allowed only on owner's profile with immutable ID & creation audit
+      allow update: if isOwner(userId) &&
+                       isValidUser(request.resource.data) &&
+                       areImmutableFieldsUnchanged(['id', 'createdAt']);
+
+      // Profile deletion restricted to admin
+      allow delete: if isAdmin();
+    }
+
+    // 2. Properties Collection
+    // Public read for properties where listingStatus != 'Sold'.
+    // Authenticated users can read all properties (including 'Sold').
+    match /properties/{propertyId} {
+      allow read: if (resource.data.listingStatus != 'Sold') || isAuthenticated();
+
+      // Only authenticated users can list properties, and ownerUid must match auth.uid
+      allow create: if isAuthenticated() &&
+                       request.resource.data.ownerUid == request.auth.uid &&
+                       request.resource.data.id == propertyId &&
+                       isValidProperty(request.resource.data);
+
+      // Only the landowner can update their property listing
+      allow update: if isAuthenticated() &&
+                       resource.data.ownerUid == request.auth.uid &&
+                       isValidProperty(request.resource.data) &&
+                       areImmutableFieldsUnchanged(['id', 'ownerUid', 'createdAt']);
+
+      // Only the landowner or admin can delete a property listing
+      allow delete: if isAuthenticated() &&
+                       (resource.data.ownerUid == request.auth.uid || isAdmin());
+    }
+
+    // 3. Site Visits Collection
+    // Field visit requests booked by buyers.
+    match /site_visits/{visitId} {
+      // Read allowed if caller is buyer, property owner, or listed in allowedUids
+      allow read: if isAuthenticated() && (
+        resource.data.buyerId == request.auth.uid ||
+        (('propertyOwnerUid' in resource.data) && resource.data.propertyOwnerUid == request.auth.uid) ||
+        (('allowedUids' in resource.data) && resource.data.allowedUids is list && request.auth.uid in resource.data.allowedUids) ||
+        isAdmin()
+      );
+
+      // Create allowed for authenticated buyers requesting a visit
+      allow create: if isAuthenticated() &&
+                       request.resource.data.buyerId == request.auth.uid &&
+                       request.resource.data.id == visitId &&
+                       request.resource.data.status == 'Scheduled' &&
+                       isValidSiteVisit(request.resource.data);
+
+      // Update allowed:
+      // (a) Buyer can cancel their own visit request
+      // (b) Property owner can update status (Confirm, Complete, Cancel)
+      // In both cases, only status and updatedAt may change; core details are immutable.
+      allow update: if isAuthenticated() &&
+                       isValidSiteVisit(request.resource.data) &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']) &&
+                       areImmutableFieldsUnchanged(['id', 'propertyId', 'buyerId', 'buyerEmail', 'phone', 'timestamp']) &&
+                       (
+                         // Buyer cancellation
+                         (resource.data.buyerId == request.auth.uid && request.resource.data.status == 'Cancelled') ||
+                         // Property owner status management
+                         (
+                           ((('propertyOwnerUid' in resource.data) && resource.data.propertyOwnerUid == request.auth.uid) ||
+                            (('allowedUids' in resource.data) && resource.data.allowedUids is list && request.auth.uid in resource.data.allowedUids)) &&
+                           request.resource.data.status in ['Confirmed', 'Completed', 'Cancelled']
+                         ) ||
+                         isAdmin()
+                       );
+
+      // Deletion restricted to admin
+      allow delete: if isAdmin();
+    }
+
+    // 4. Broker Reports Collection
+    // Zero-Brokerage whistleblowing: Anyone can submit a report; only admins can view and manage.
+    match /broker_reports/{reportId} {
+      // Creation allowed for any visitor or authenticated user
+      allow create: if request.resource.data.id == reportId &&
+                       request.resource.data.status == 'Under Investigation' &&
+                       isValidBrokerReport(request.resource.data) &&
+                       (
+                         // If authenticated, reporterId must either match UID or be null
+                         (isAuthenticated() && (!('reporterId' in request.resource.data) || request.resource.data.reporterId == null || request.resource.data.reporterId == request.auth.uid)) ||
+                         // If visitor, reporterId must not be set or must be null
+                         (!isAuthenticated() && (!('reporterId' in request.resource.data) || request.resource.data.reporterId == null))
+                       );
+
+      // Read, update, and delete are strictly reserved for admins
+      allow read: if isAdmin();
+
+      allow update: if isAdmin() &&
+                       isValidBrokerReport(request.resource.data) &&
+                       areImmutableFieldsUnchanged(['id', 'timestamp', 'brokerPhone', 'demandDetails']);
+
+      allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Default Deny Rule
+    // ===============================================================
+    match /{document=**} {
+      allow read, write: false;
+    }
+  }
+}

@@ -1096,40 +1096,49 @@ class LandApp {
   }
 
   applyAccount(user) {
-    this.account = user || null;
-    if (window.firebaseAuth) {
-      window.firebaseAuth.currentUser = user ? {
-        uid: user.id,
-        displayName: user.name,
-        email: user.email,
-        phone: user.phone || '',
-        role: user.role,
-        photoURL: null,
-        isVerified: true,
-        provider: 'password'
-      } : null;
-      window.firebaseAuth.currentRole = user ? user.role : 'buyer';
+    if (!user) {
+      this.account = null;
+      if (window.firebaseAuth) window.firebaseAuth.currentUser = null;
+      this.onAuthStateChange(null);
+      if (this.currentView === 'dashboard') this.renderDashboard();
+      if (this.currentView === 'home') this.renderHome();
+      if (this.currentView === 'properties') this.renderProperties();
+      return;
     }
-    this.onAuthStateChange(window.firebaseAuth ? window.firebaseAuth.currentUser : null);
+    const normalized = {
+      id: user.uid || user.id,
+      uid: user.uid || user.id,
+      name: user.displayName || user.name || user.email?.split('@')[0] || 'User',
+      displayName: user.displayName || user.name || user.email?.split('@')[0] || 'User',
+      email: user.email,
+      phone: user.phone || '',
+      role: user.role || (window.firebaseAuth ? window.firebaseAuth.currentRole : 'buyer'),
+      photoURL: user.photoURL || null,
+      isVerified: true,
+      provider: user.provider || 'password'
+    };
+    this.account = normalized;
+    if (window.firebaseAuth) {
+      window.firebaseAuth.currentUser = normalized;
+      window.firebaseAuth.currentRole = normalized.role;
+    }
+    this.onAuthStateChange(normalized);
     if (this.currentView === 'dashboard') this.renderDashboard();
     if (this.currentView === 'home') this.renderHome();
     if (this.currentView === 'properties') this.renderProperties();
   }
 
   async restoreSession() {
-    const token = localStorage.getItem('insightliker_session_token');
-    if (!token) return;
-    try {
-      const res = await fetch('/api/auth/me', { headers: this.authHeaders() });
-      if (!res.ok) {
-        localStorage.removeItem('insightliker_session_token');
-        return;
-      }
-      const json = await res.json();
-      this.applyAccount(json.user);
-    } catch (err) {
-      console.warn('Session restore skipped', err.message);
+    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+      this.applyAccount(window.firebaseAuth.currentUser);
+      return;
     }
+    try {
+      const stored = localStorage.getItem('insightliker_current_user');
+      if (stored) {
+        this.applyAccount(JSON.parse(stored));
+      }
+    } catch (e) {}
   }
 
   upsertProperty(property) {
@@ -1200,30 +1209,22 @@ class LandApp {
 
   async syncServerProperties() {
     try {
-      const res = await fetch('/api/properties', { headers: this.authHeaders() });
-      if (!res.ok) return;
-      const json = await res.json();
-      const serverProps = Array.isArray(json.data) ? json.data : [];
-      const serverIds = new Set(serverProps.map((property) => property.id));
-      this.properties = [
-        ...serverProps,
-        ...INITIAL_PROPERTIES.filter((property) => !serverIds.has(property.id))
-      ];
-
-      if (this.account && this.account.role === 'seller') {
-        const mineRes = await fetch('/api/me/listings', { headers: this.authHeaders() });
-        if (mineRes.ok) {
-          const mineJson = await mineRes.json();
-          (mineJson.data || []).forEach((property) => this.upsertProperty(property));
-        }
+      let cloudProps = [];
+      if (window.firebaseAuth) {
+        cloudProps = await window.firebaseAuth.fetchProperties();
       }
+      const cloudIds = new Set(cloudProps.map((property) => property.id));
+      this.properties = [
+        ...cloudProps,
+        ...INITIAL_PROPERTIES.filter((property) => !cloudIds.has(property.id))
+      ];
 
       if (this.currentView === 'properties') this.renderProperties();
       else if (this.currentView === 'home') this.renderHome();
       else if (this.currentView === 'saved') this.renderSavedProperties();
       else if (this.currentView === 'dashboard') this.renderDashboard();
     } catch (e) {
-      // Catalog seed stays visible if the API is offline.
+      console.warn('Properties sync note:', e);
     }
   }
 
@@ -1897,23 +1898,16 @@ class LandApp {
     }
     let prop = this.properties.find(p => p.id === id);
     if (!prop) return;
-    if (prop.contactLocked || !prop.owner?.whatsapp) {
-      try {
-        const res = await fetch(`/api/properties/${encodeURIComponent(id)}`, { headers: this.authHeaders() });
-        if (res.ok) {
-          const json = await res.json();
-          if (json.property) {
-            prop = json.property;
-            this.upsertProperty(prop);
-          }
-        }
-      } catch (err) {
-        this.showToast('Could not load the landowner contact.', 'error');
-        return;
-      }
+    if (!this.account) {
+      this.showToast('Please sign in to view direct landowner phone & WhatsApp details.');
+      this.openAuthModal('signin', 'buyer');
+      return;
     }
-    if (!prop.owner?.phone || prop.contactLocked) {
-      this.showToast('Contact is available after you sign in.');
+    if (prop.owner && !prop.owner.whatsapp && prop.owner.phone) {
+      prop.owner.whatsapp = prop.owner.phone.replace(/[^0-9]/g, '');
+    }
+    if (!prop.owner?.phone) {
+      this.showToast('Owner contact is being verified.', 'error');
       return;
     }
 
@@ -2041,13 +2035,18 @@ class LandApp {
     };
 
     try {
-      const res = await fetch('/api/site-visits', {
-        method: 'POST',
-        headers: this.authHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(visitData)
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Could not send the visit request.');
+      const newVisit = {
+        id: `visit-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        status: 'Scheduled',
+        buyerId: this.account?.uid || this.account?.id || 'guest-buyer',
+        buyerEmail: this.account?.email || '',
+        propertyOwnerUid: property?.ownerUid || '',
+        ...visitData
+      };
+      if (window.firebaseAuth) {
+        await window.firebaseAuth.requestSiteVisit(newVisit);
+      }
       this.closeModal('ownerContactModal');
       this.showToast('Visit request sent to the landowner. Track it in your buyer dashboard.');
     } catch (err) {
@@ -2102,17 +2101,17 @@ class LandApp {
     const form = document.querySelector('#reportBrokerModal form');
     const inputs = form ? form.querySelectorAll('input, textarea') : [];
     const reportData = {
+      id: `report-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      status: 'Under Investigation',
+      reporterId: this.account?.uid || this.account?.id || null,
       brokerPhone: inputs[0]?.value || '',
       demandDetails: inputs[1]?.value || '',
       reporterContact: inputs[2]?.value || ''
     };
 
-    if (typeof fetch !== 'undefined') {
-      fetch('/api/report-broker', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reportData)
-      }).catch(() => {});
+    if (window.firebaseAuth) {
+      window.firebaseAuth.reportBroker(reportData).catch(() => {});
     }
 
     this.closeModal('reportBrokerModal');
@@ -2560,20 +2559,23 @@ class LandApp {
     };
 
     try {
-      const res = await fetch('/api/properties', {
-        method: 'POST',
-        headers: this.authHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(newListing)
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Could not publish this listing.');
-      this.upsertProperty(json.property);
+      const listingToSave = {
+        id: `prop-${Date.now()}`,
+        ownerUid: this.account?.uid || this.account?.id || 'demo-seller',
+        createdAt: new Date().toISOString(),
+        listingStatus: 'Available',
+        ...newListing
+      };
+      if (window.firebaseAuth) {
+        await window.firebaseAuth.publishProperty(listingToSave);
+      }
+      this.upsertProperty(listingToSave);
       form.reset();
       this.uploadedPreviewImage = null;
       const preview = document.getElementById('listPhotoPreview');
       if (preview) preview.classList.add('hidden');
       this.showToast('Your land is published. Buyers can view it now.');
-      this.openPropertyDetail(json.property.id);
+      this.openPropertyDetail(listingToSave.id);
     } catch (err) {
       this.showToast(err.message || 'Could not publish this listing.', 'error');
     }
@@ -2857,21 +2859,20 @@ class LandApp {
 
     try {
       const isSignup = this.authMode === 'signup';
-      const res = await fetch(isSignup ? '/api/auth/register' : '/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(isSignup ? { name, email, password, role } : { email, password })
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Authentication failed.');
-      localStorage.setItem('insightliker_session_token', json.token);
-      this.applyAccount(json.user);
+      let authResult;
+      if (isSignup) {
+        authResult = await window.firebaseAuth.signUpWithEmail(name, email, password, role);
+      } else {
+        authResult = await window.firebaseAuth.signInWithEmail(email, password);
+      }
+      const user = authResult.user;
+      this.applyAccount(user);
       await this.syncServerProperties();
       this.closeModal('authModal');
       form.reset();
-      const label = json.user.role === 'seller' ? 'landowner' : 'buyer';
-      this.showToast(isSignup ? `Welcome ${json.user.name}. Your ${label} account is ready.` : `Signed in as ${label}.`);
-      if (json.user.role === 'seller') window.location.hash = 'dashboard';
+      const label = user.role === 'seller' ? 'landowner' : 'buyer';
+      this.showToast(isSignup ? `Welcome ${user.displayName || user.name}. Your ${label} account is ready.` : `Signed in as ${label}.`);
+      if (user.role === 'seller') window.location.hash = 'dashboard';
       else if (this.currentView === 'list-property') window.location.hash = 'properties';
       else if (this.currentView === 'dashboard') this.renderDashboard();
     } catch (err) {
@@ -2888,8 +2889,12 @@ class LandApp {
 
     try {
       const res = await window.firebaseAuth.signInWithGoogle();
+      this.applyAccount(res.user);
+      await this.syncServerProperties();
       this.closeModal('authModal');
-      this.showToast(`Welcome ${res.user.displayName}! Signed in with Google.`);
+      this.showToast(`Welcome ${res.user.displayName || res.user.name}! Signed in with Google.`);
+      if (res.user.role === 'seller') window.location.hash = 'dashboard';
+      else if (this.currentView === 'dashboard') this.renderDashboard();
     } catch (err) {
       if (errorEl) {
         errorEl.textContent = err.message || "Google Sign-In failed.";
@@ -2902,9 +2907,9 @@ class LandApp {
     const dropdown = document.getElementById('authUserDropdown');
     if (dropdown) dropdown.classList.add('hidden');
     try {
-      await fetch('/api/auth/logout', { method: 'POST', headers: this.authHeaders() });
+      if (window.firebaseAuth) await window.firebaseAuth.signOut();
     } catch (err) {
-      // Local sign-out still clears the session.
+      // Local sign-out still clears session
     }
     localStorage.removeItem('insightliker_session_token');
     this.applyAccount(null);
@@ -3074,20 +3079,14 @@ class LandApp {
     let visits = [];
     try {
       if (isSeller) {
-        const res = await fetch('/api/me/listings', { headers: this.authHeaders() });
-        if (res.ok) {
-          const json = await res.json();
-          myProperties = json.data || [];
-          myProperties.forEach((property) => this.upsertProperty(property));
-        }
+        const myUid = this.account?.uid || this.account?.id;
+        myProperties = this.properties.filter((property) => property.ownerUid === myUid || (this.account?.email && property.owner && property.owner.name === this.account.name));
       }
-      const visitRes = await fetch('/api/me/visits', { headers: this.authHeaders() });
-      if (visitRes.ok) {
-        const json = await visitRes.json();
-        visits = json.data || [];
+      if (window.firebaseAuth) {
+        visits = await window.firebaseAuth.fetchVisits(this.account);
       }
     } catch (err) {
-      this.showToast('Could not load your dashboard.', 'error');
+      console.warn('Dashboard data fetch note:', err);
     }
 
     const savedCount = this.savedPropertyIds.filter((id) => this.properties.some((property) => property.id === id)).length;
@@ -3216,12 +3215,9 @@ class LandApp {
   async deleteProperty(id) {
     if (!confirm("Delete this listing? Buyers will no longer see it.")) return;
     try {
-      const res = await fetch(`/api/properties/${encodeURIComponent(id)}`, {
-        method: 'DELETE',
-        headers: this.authHeaders()
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Could not delete this listing.');
+      if (window.firebaseAuth) {
+        await window.firebaseAuth.deleteProperty(id);
+      }
       this.properties = this.properties.filter((property) => property.id !== id);
       this.showToast('Property listing deleted.');
       this.renderDashboard();
@@ -3239,14 +3235,12 @@ class LandApp {
     const currentIdx = statuses.indexOf(prop.listingStatus || 'Available');
     const nextStatus = statuses[(currentIdx + 1) % statuses.length];
     try {
-      const res = await fetch(`/api/properties/${encodeURIComponent(id)}`, {
-        method: 'PUT',
-        headers: this.authHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ listingStatus: nextStatus })
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Could not update this listing.');
-      this.upsertProperty(json.property);
+      prop.listingStatus = nextStatus;
+      prop.updatedAt = new Date().toISOString();
+      if (window.firebaseAuth) {
+        await window.firebaseAuth.publishProperty(prop);
+      }
+      this.upsertProperty(prop);
       this.showToast(`Property marked as ${nextStatus}.`);
       this.renderDashboard();
       if (this.currentView === 'properties') this.renderProperties();
@@ -3257,13 +3251,9 @@ class LandApp {
 
   async updateVisitStatus(id, newStatus) {
     try {
-      const res = await fetch(`/api/site-visits/${encodeURIComponent(id)}`, {
-        method: 'PUT',
-        headers: this.authHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ status: newStatus })
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Could not update this visit.');
+      if (window.firebaseAuth) {
+        await window.firebaseAuth.updateVisitStatus(id, newStatus);
+      }
       this.showToast(`Visit marked as ${newStatus}.`);
       this.renderDashboard();
     } catch (err) {

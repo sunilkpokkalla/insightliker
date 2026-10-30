@@ -122,7 +122,49 @@ class FirebaseAuthService {
   }
 
   loadPersistedSession() {
-    // Accounts are issued by the Node API. Browser storage is not a login.
+    this.seedDemoAccounts();
+    try {
+      const stored = localStorage.getItem('insightliker_current_user');
+      if (stored) {
+        this.currentUser = JSON.parse(stored);
+        this.currentRole = this.currentUser.role || this.currentRole;
+      }
+    } catch (e) {
+      this.currentUser = null;
+    }
+  }
+
+  seedDemoAccounts() {
+    try {
+      const stored = localStorage.getItem('insightliker_registered_users');
+      if (!stored || stored === '[]') {
+        const demos = [
+          {
+            uid: 'user-buyer',
+            displayName: 'Anitha Reddy',
+            email: 'buyer@insightliker.com',
+            password: 'Buyer@123',
+            role: 'buyer',
+            phone: '+91 90000 11111',
+            isVerified: true,
+            provider: 'password',
+            createdAt: new Date().toISOString()
+          },
+          {
+            uid: 'user-seller',
+            displayName: 'K. Ramakrishna Rao',
+            email: 'seller@insightliker.com',
+            password: 'Seller@123',
+            role: 'seller',
+            phone: '+91 98480 12345',
+            isVerified: true,
+            provider: 'password',
+            createdAt: new Date().toISOString()
+          }
+        ];
+        localStorage.setItem('insightliker_registered_users', JSON.stringify(demos));
+      }
+    } catch (e) {}
   }
 
   persistSession(userData) {
@@ -364,8 +406,36 @@ class FirebaseAuthService {
     }
   }
 
-  // --- Cloud Firestore Integration Helpers ---
-  async syncPropertyToCloud(property) {
+  // --- Cloud Firestore & Local Simulation Storage Helpers ---
+
+  async fetchProperties() {
+    let cloudProps = [];
+    if (this.isLiveFirebase && this.firestoreInstance) {
+      try {
+        const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        const snapshot = await getDocs(collection(this.firestoreInstance, 'properties'));
+        snapshot.forEach((doc) => {
+          cloudProps.push({ id: doc.id, ...doc.data() });
+        });
+      } catch (err) {
+        console.warn('Firestore fetch properties error:', err.message);
+      }
+    }
+    // Also merge local custom listings (persisted across sessions)
+    let localProps = [];
+    try {
+      const stored = localStorage.getItem('insightliker_cloud_properties');
+      if (stored) localProps = JSON.parse(stored);
+    } catch (e) {}
+
+    // Combine unique properties by ID (local takes precedence if updated)
+    const combinedMap = new Map();
+    cloudProps.forEach((p) => combinedMap.set(p.id, p));
+    localProps.forEach((p) => combinedMap.set(p.id, p));
+    return Array.from(combinedMap.values());
+  }
+
+  async publishProperty(property) {
     if (this.isLiveFirebase && this.firestoreInstance) {
       try {
         const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
@@ -375,21 +445,23 @@ class FirebaseAuthService {
         console.warn('Firestore write notice:', err.message);
       }
     }
+    // Always persist to local custom listings
+    try {
+      const stored = localStorage.getItem('insightliker_cloud_properties');
+      const list = stored ? JSON.parse(stored) : [];
+      const idx = list.findIndex((item) => item.id === property.id);
+      if (idx >= 0) list[idx] = property;
+      else list.unshift(property);
+      localStorage.setItem('insightliker_cloud_properties', JSON.stringify(list));
+    } catch (e) {}
+    return { success: true, property };
   }
 
-  async syncVisitToCloud(visit) {
-    if (this.isLiveFirebase && this.firestoreInstance) {
-      try {
-        const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-        await setDoc(doc(this.firestoreInstance, 'site_visits', visit.id), visit, { merge: true });
-        console.log('☁️ Field visit synced to Cloud Firestore:', visit.id);
-      } catch (err) {
-        console.warn('Firestore visit notice:', err.message);
-      }
-    }
+  async syncPropertyToCloud(property) {
+    return this.publishProperty(property);
   }
 
-  async deletePropertyFromCloud(propertyId) {
+  async deleteProperty(propertyId) {
     if (this.isLiveFirebase && this.firestoreInstance) {
       try {
         const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
@@ -399,6 +471,120 @@ class FirebaseAuthService {
         console.warn('Firestore delete notice:', err.message);
       }
     }
+    try {
+      const stored = localStorage.getItem('insightliker_cloud_properties');
+      if (stored) {
+        const list = JSON.parse(stored).filter((p) => p.id !== propertyId);
+        localStorage.setItem('insightliker_cloud_properties', JSON.stringify(list));
+      }
+    } catch (e) {}
+    return { success: true };
+  }
+
+  async deletePropertyFromCloud(propertyId) {
+    return this.deleteProperty(propertyId);
+  }
+
+  async requestSiteVisit(visit) {
+    if (this.isLiveFirebase && this.firestoreInstance) {
+      try {
+        const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        await setDoc(doc(this.firestoreInstance, 'site_visits', visit.id), visit, { merge: true });
+        console.log('☁️ Field visit synced to Cloud Firestore:', visit.id);
+      } catch (err) {
+        console.warn('Firestore visit notice:', err.message);
+      }
+    }
+    try {
+      const stored = localStorage.getItem('insightliker_cloud_visits');
+      const list = stored ? JSON.parse(stored) : [];
+      list.unshift(visit);
+      localStorage.setItem('insightliker_cloud_visits', JSON.stringify(list));
+    } catch (e) {}
+    return { success: true, visit };
+  }
+
+  async syncVisitToCloud(visit) {
+    return this.requestSiteVisit(visit);
+  }
+
+  async fetchVisits(authUser) {
+    if (!authUser) return [];
+    let visits = [];
+    if (this.isLiveFirebase && this.firestoreInstance) {
+      try {
+        const { collection, getDocs, query, where } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        let q;
+        if (authUser.role === 'buyer') {
+          q = query(collection(this.firestoreInstance, 'site_visits'), where('buyerId', '==', authUser.uid));
+        } else {
+          q = query(collection(this.firestoreInstance, 'site_visits'));
+        }
+        const snapshot = await getDocs(q);
+        snapshot.forEach((doc) => visits.push({ id: doc.id, ...doc.data() }));
+      } catch (err) {
+        console.warn('Firestore fetch visits notice:', err.message);
+      }
+    }
+    // Merge local visits
+    try {
+      const stored = localStorage.getItem('insightliker_cloud_visits');
+      if (stored) {
+        const localList = JSON.parse(stored);
+        const map = new Map();
+        visits.forEach((v) => map.set(v.id, v));
+        localList.forEach((v) => map.set(v.id, v));
+        visits = Array.from(map.values());
+      }
+    } catch (e) {}
+
+    // Filter by role
+    if (authUser.role === 'buyer') {
+      return visits.filter((v) => v.buyerId === authUser.uid || v.buyerId === authUser.id);
+    }
+    return visits;
+  }
+
+  async updateVisitStatus(visitId, status) {
+    if (this.isLiveFirebase && this.firestoreInstance) {
+      try {
+        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        await updateDoc(doc(this.firestoreInstance, 'site_visits', visitId), { status, updatedAt: new Date().toISOString() });
+      } catch (err) {
+        console.warn('Firestore visit update notice:', err.message);
+      }
+    }
+    try {
+      const stored = localStorage.getItem('insightliker_cloud_visits');
+      if (stored) {
+        const list = JSON.parse(stored);
+        const item = list.find((v) => v.id === visitId);
+        if (item) {
+          item.status = status;
+          item.updatedAt = new Date().toISOString();
+          localStorage.setItem('insightliker_cloud_visits', JSON.stringify(list));
+        }
+      }
+    } catch (e) {}
+    return { success: true };
+  }
+
+  async reportBroker(report) {
+    if (this.isLiveFirebase && this.firestoreInstance) {
+      try {
+        const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        await setDoc(doc(this.firestoreInstance, 'broker_reports', report.id), report);
+      } catch (err) {
+        console.warn('Firestore broker report notice:', err.message);
+      }
+    }
+    try {
+      const stored = localStorage.getItem('insightliker_broker_reports');
+      const list = stored ? JSON.parse(stored) : [];
+      list.unshift(report);
+      localStorage.setItem('insightliker_broker_reports', JSON.stringify(list));
+    } catch (e) {}
+    return { success: true };
   }
 
   async signOut() {
