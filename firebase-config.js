@@ -11,12 +11,13 @@
 
 // Default or Local Storage Firebase Configuration
 const DEFAULT_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDEMO-KEY-INSIGHTLIKER-REALESTATE-2026",
-  authDomain: "insightliker-realland.firebaseapp.com",
-  projectId: "insightliker-realland",
-  storageBucket: "insightliker-realland.appspot.com",
-  messagingSenderId: "109823471092",
-  appId: "1:109823471092:web:98f7e2a41d082b6c9342ef"
+  apiKey: "AIzaSyA35AGWANa1fjBKxS-JGz82vSW3R4Y2kCU",
+  authDomain: "insightliker.firebaseapp.com",
+  projectId: "insightliker",
+  storageBucket: "insightliker.firebasestorage.app",
+  messagingSenderId: "293962414005",
+  appId: "1:293962414005:web:2af53522467dcbd4750bfc",
+  measurementId: "G-YNF56LBWDB"
 };
 
 class FirebaseAuthService {
@@ -36,7 +37,10 @@ class FirebaseAuthService {
     try {
       const stored = localStorage.getItem('insightliker_firebase_config');
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (parsed.apiKey && !parsed.apiKey.includes('DEMO-KEY')) {
+          return { ...DEFAULT_FIREBASE_CONFIG, ...parsed };
+        }
       }
     } catch (e) {
       console.warn('Error reading saved Firebase config', e);
