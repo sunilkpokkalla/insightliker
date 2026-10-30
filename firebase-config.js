@@ -229,6 +229,23 @@ class FirebaseAuthService {
         provider.setCustomParameters({ prompt: 'select_account' });
         const result = await signInWithPopup(this.authInstance, provider);
         this.handleFirebaseUser(result.user);
+        if (this.firestoreInstance) {
+          try {
+            const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+            await setDoc(doc(this.firestoreInstance, 'users', result.user.uid), {
+              id: result.user.uid,
+              name: result.user.displayName || result.user.email.split('@')[0],
+              email: result.user.email,
+              role: this.currentUser.role || 'buyer',
+              photoURL: result.user.photoURL || null,
+              isVerified: true,
+              provider: 'google.com',
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+          } catch (e) {
+            console.warn('Firestore user profile sync note:', e.message);
+          }
+        }
         return { success: true, user: this.currentUser };
       } catch (err) {
         console.warn('Live Google Sign-In popup notice:', err.code, err.message);

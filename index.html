@@ -226,9 +226,14 @@
         <div id="mobileAuthBanner" class="p-3.5 rounded-xl bg-surface-container-low border border-border-light flex flex-col gap-2">
           <div id="mobileAuthUnlogged">
             <p class="text-xs text-on-surface-variant font-medium">Join South India's 100% direct landowner marketplace.</p>
-            <button onclick="app.openAuthModal('signin'); document.getElementById('mobileDrawer').classList.add('hidden')" class="mt-2 w-full py-2.5 rounded-lg btn-primary-kinetic text-xs font-bold flex items-center justify-center gap-1.5">
-              <span class="material-symbols-outlined text-[16px]">login</span>
-              <span>Sign In / Create Account</span>
+            <button onclick="app.openAuthModal('signin'); document.getElementById('mobileDrawer').classList.add('hidden')" class="mt-2 w-full py-2.5 rounded-lg btn-primary-kinetic text-xs font-bold flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>Sign In with Google</span>
             </button>
           </div>
           <div id="mobileAuthLogged" class="hidden flex flex-col gap-1.5">
@@ -1085,130 +1090,75 @@
 
       <!-- Auth Modal Header -->
       <div class="text-center mb-6">
-        <div class="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center mx-auto mb-3 shadow-md">
-          <span class="material-symbols-outlined text-[28px] text-tertiary-fixed">lock</span>
+        <div class="w-14 h-14 rounded-2xl bg-surface-container text-primary flex items-center justify-center mx-auto mb-3 shadow-sm border border-border-light">
+          <!-- Google 'G' icon -->
+          <svg class="w-7 h-7" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
         </div>
-        <h3 id="authModalTitle" data-i18n="authModalTitle" class="text-xl md:text-2xl font-heading font-extrabold text-primary">Sign In to InSightLiker</h3>
-        <p id="authModalSubtitle" data-i18n="authModalSubtitle" class="text-xs text-on-surface-variant mt-1">Direct Land Marketplace for South India</p>
+        <h3 id="authModalTitle" class="text-xl md:text-2xl font-heading font-extrabold text-primary">Sign In with Google</h3>
+        <p id="authModalSubtitle" class="text-xs text-on-surface-variant mt-1.5">Direct 1-Click Access to South India's Real Land Marketplace</p>
       </div>
 
-      <!-- Auth Mode Toggle Tabs (Sign In vs Create Account vs Mobile OTP) -->
-      <div class="flex p-1 rounded-xl bg-surface-container border border-border-light mb-5">
-        <button id="authTabSignIn" onclick="app.switchAuthTab('signin')" class="flex-1 py-2 rounded-lg bg-primary-container text-white font-bold text-xs shadow-sm transition-all">
-          <span data-i18n="authTabSignIn">Sign In</span>
-        </button>
-        <button id="authTabSignUp" onclick="app.switchAuthTab('signup')" class="flex-1 py-2 rounded-lg text-on-surface-variant font-bold text-xs hover:text-primary transition-all">
-          <span data-i18n="authTabSignUp">Register</span>
-        </button>
-        <button id="authTabPhone" type="button" onclick="app.switchAuthTab('phone')" style="display:none" class="flex-1 py-2 rounded-lg text-on-surface-variant font-bold text-xs hover:text-primary transition-all items-center justify-center gap-1">
-          <span class="material-symbols-outlined text-[15px]">smartphone</span>
-          <span data-i18n="authTabPhone">Mobile OTP</span>
-        </button>
-      </div>
-
-      <!-- Role Selection (Shown prominently on Sign Up or Role Switch) -->
+      <!-- Role Selection (Choose whether you are Buyer or Landowner) -->
       <div id="authRoleSection" class="mb-5">
-        <label class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-2">Account type (fixed after registration)</label>
-        <div class="grid grid-cols-2 gap-2">
+        <label class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-2 text-center">Select Your Account Type</label>
+        <div class="grid grid-cols-2 gap-2.5">
           
           <label class="cursor-pointer">
             <input type="radio" name="authRole" value="buyer" checked class="peer sr-only">
-            <div class="p-3 rounded-xl border border-border-light peer-checked:border-primary peer-checked:bg-surface-container-low transition-all flex flex-col items-center text-center gap-1">
-              <span class="material-symbols-outlined text-[22px] text-primary">person_search</span>
-              <span class="text-xs font-bold text-on-surface">Land Buyer</span>
-              <span class="text-[10px] text-on-surface-variant">Explore & Visit</span>
+            <div class="p-3.5 rounded-2xl border-2 border-border-light peer-checked:border-primary peer-checked:bg-surface-container-low transition-all flex flex-col items-center text-center gap-1 hover:border-primary/50">
+              <span class="material-symbols-outlined text-[24px] text-primary">person_search</span>
+              <span class="text-xs font-bold text-on-surface">Verified Buyer</span>
+              <span class="text-[10px] text-on-surface-variant leading-tight">Explore & Visit Direct Lands</span>
             </div>
           </label>
 
           <label class="cursor-pointer">
             <input type="radio" name="authRole" value="seller" class="peer sr-only">
-            <div class="p-3 rounded-xl border border-border-light peer-checked:border-secondary peer-checked:bg-[#fcf8ee] transition-all flex flex-col items-center text-center gap-1">
-              <span class="material-symbols-outlined text-[22px] text-secondary">agriculture</span>
-              <span class="text-xs font-bold text-on-surface">Landowner</span>
-              <span class="text-[10px] text-on-surface-variant">List Lands Free</span>
+            <div class="p-3.5 rounded-2xl border-2 border-border-light peer-checked:border-secondary peer-checked:bg-[#fcf8ee] transition-all flex flex-col items-center text-center gap-1 hover:border-secondary/50">
+              <span class="material-symbols-outlined text-[24px] text-secondary">agriculture</span>
+              <span class="text-xs font-bold text-on-surface">Direct Landowner</span>
+              <span class="text-[10px] text-on-surface-variant leading-tight">List Lands Free (0% Fee)</span>
             </div>
           </label>
 
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-2 mb-4">
-        <button type="button" onclick="app.fillDemoAccount('buyer')" class="py-2 px-3 rounded-xl border border-border-light bg-surface-container-low text-[11px] font-bold text-primary">Use buyer demo</button>
-        <button type="button" onclick="app.fillDemoAccount('seller')" class="py-2 px-3 rounded-xl border border-border-light bg-surface-container-low text-[11px] font-bold text-secondary">Use landowner demo</button>
-      </div>
-
-      <!-- Google Sign-In (hidden until a live Firebase project is connected) -->
-      <button type="button" onclick="app.handleGoogleAuth()" style="display:none" class="w-full py-2.5 px-4 rounded-xl border border-border-light hover:bg-surface-container items-center justify-center gap-2.5 text-xs font-bold text-on-surface transition-colors shadow-sm mb-4">
-        <svg class="w-4 h-4" viewBox="0 0 24 24">
+      <!-- Prominent Google Sign-In Button -->
+      <button type="button" id="authGoogleBtn" onclick="app.handleGoogleAuth()" class="w-full py-3.5 px-5 rounded-2xl border-2 border-border-light hover:border-primary bg-white hover:bg-surface-container-low flex items-center justify-center gap-3 text-sm font-bold text-on-surface transition-all shadow-md hover:shadow-lg active:scale-95 group">
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
         </svg>
-        <span data-i18n="authGoogleBtn">Continue with Google</span>
+        <span data-i18n="authGoogleBtn">Continue with Google (Gmail)</span>
       </button>
 
-      <div class="flex items-center gap-2 my-4">
-        <div class="flex-1 h-px bg-border-light"></div>
-        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">or with Email</span>
-        <div class="flex-1 h-px bg-border-light"></div>
+      <!-- Inline Error Banner -->
+      <div id="authErrorMessage" class="hidden mt-3 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium text-center"></div>
+
+      <!-- Trust Assurance Note -->
+      <div class="mt-5 pt-4 border-t border-border-light text-center">
+        <p class="text-[11px] text-on-surface-variant flex items-center justify-center gap-1.5 font-medium">
+          <span class="material-symbols-outlined text-[16px] text-primary">verified_user</span>
+          <span>1-Click secure verification via Google • Zero passwords required</span>
+        </p>
       </div>
 
-      <!-- Auth Form (Email / Password) -->
-      <form id="authForm" onsubmit="event.preventDefault(); app.handleAuthSubmit(this)" class="flex flex-col gap-3">
-        
-        <div id="authNameField" class="hidden">
-          <label class="text-xs font-semibold text-on-surface block mb-1">Your Full Name</label>
-          <input type="text" id="authInputName" placeholder="e.g. Ramesh Kumar" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-xs font-semibold focus:outline-none focus:border-primary">
-        </div>
-
-        <div>
-          <label class="text-xs font-semibold text-on-surface block mb-1">Email Address</label>
-          <input type="email" id="authInputEmail" required placeholder="name@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-xs font-semibold focus:outline-none focus:border-primary">
-        </div>
-
-        <div>
-          <label class="text-xs font-semibold text-on-surface block mb-1">Password</label>
-          <input type="password" id="authInputPassword" required placeholder="Minimum 6 characters" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-xs font-semibold focus:outline-none focus:border-primary">
-        </div>
-
-        <!-- Inline Error Banner -->
-        <div id="authErrorMessage" class="hidden p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium"></div>
-
-        <button type="submit" id="authSubmitBtn" class="w-full mt-2 py-3 rounded-xl btn-primary-kinetic text-xs md:text-sm font-bold flex items-center justify-center gap-1.5 shadow-md">
-          <span class="material-symbols-outlined text-[18px]">login</span>
-          <span id="authSubmitText">Sign In</span>
+      <!-- Quick Demo Access (Accordion for testing/preview) -->
+      <div class="mt-3 text-center">
+        <button type="button" onclick="document.getElementById('demoAccountsSection').classList.toggle('hidden')" class="text-[11px] text-on-surface-variant hover:text-primary font-semibold underline">
+          Need quick demo access? Click here
         </button>
-      </form>
-
-      <!-- Phone OTP Form Container (Shown when Mobile OTP tab is active) -->
-      <div id="authPhoneContainer" class="hidden flex flex-col gap-3">
-        <div id="recaptchaContainer"></div>
-        <div id="phoneStepNumber">
-          <label class="text-xs font-semibold text-on-surface block mb-1">Mobile Number (India +91)</label>
-          <div class="flex gap-2">
-            <span class="px-3 py-2.5 rounded-xl bg-surface-container border border-border-light text-xs font-bold text-primary flex items-center">+91</span>
-            <input type="tel" id="authInputPhone" placeholder="98480 12345" class="flex-1 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-xs font-semibold focus:outline-none focus:border-primary">
-          </div>
-          <button type="button" onclick="app.handleSendPhoneOtp()" class="w-full mt-3 py-2.5 rounded-xl btn-primary-kinetic text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
-            <span class="material-symbols-outlined text-[16px]">send</span>
-            <span>Send 6-Digit OTP</span>
-          </button>
-        </div>
-
-        <div id="phoneStepOtp" class="hidden flex flex-col gap-2">
-          <div class="p-2 rounded-xl bg-surface-container-low border border-border-light text-center">
-            <span class="text-[11px] text-on-surface-variant">SMS code sent to: <strong id="phoneTargetDisplay">+91 •••••</strong></span>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-on-surface block mb-1">Enter 6-Digit OTP Code</label>
-            <input type="text" id="authInputOtp" maxlength="6" placeholder="e.g. 123456" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-border-light text-sm font-bold tracking-widest text-center text-primary focus:outline-none focus:border-primary">
-            <span class="text-[10px] text-on-surface-variant block mt-1 text-center font-medium">Demo sandbox code: <strong>123456</strong></span>
-          </div>
-          <button type="button" onclick="app.handleVerifyPhoneOtp()" class="w-full mt-1 py-2.5 rounded-xl btn-primary-kinetic text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
-            <span class="material-symbols-outlined text-[16px]">check_circle</span>
-            <span>Verify & Sign In</span>
-          </button>
+        <div id="demoAccountsSection" class="hidden mt-2 grid grid-cols-2 gap-2 animate-fadeIn">
+          <button type="button" onclick="app.handleDemoLogin('buyer')" class="py-2 px-3 rounded-xl border border-border-light bg-surface-container-low text-[11px] font-bold text-primary hover:bg-surface-container">Enter as Buyer Demo</button>
+          <button type="button" onclick="app.handleDemoLogin('seller')" class="py-2 px-3 rounded-xl border border-border-light bg-surface-container-low text-[11px] font-bold text-secondary hover:bg-surface-container">Enter as Landowner Demo</button>
         </div>
       </div>
 

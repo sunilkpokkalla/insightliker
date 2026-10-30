@@ -2708,74 +2708,20 @@ class LandApp {
       if (mobileLogged) mobileLogged.classList.add('hidden');
 
       if (listAuthTitle) listAuthTitle.textContent = "Want to manage and track your listing?";
-      if (listAuthDesc) listAuthDesc.textContent = "Sign in or register to link this property directly to your profile.";
+      if (listAuthDesc) listAuthDesc.textContent = "Sign in with Google to link this property directly to your landowner profile.";
       if (listAuthActionBtn) {
-        listAuthActionBtn.textContent = "Sign In / Register";
+        listAuthActionBtn.textContent = "Sign In with Google to Publish";
         listAuthActionBtn.onclick = () => this.openAuthModal('signin', 'seller');
       }
     }
   }
 
   openAuthModal(tab = 'signin', role = 'buyer') {
-    this.switchAuthTab(tab);
     const radio = document.querySelector(`input[name="authRole"][value="${role}"]`);
     if (radio) radio.checked = true;
-    this.openModal('authModal');
-  }
-
-  switchAuthTab(tab) {
-    this.authMode = tab; // 'signin' | 'signup' | 'phone'
-    const tabSignIn = document.getElementById('authTabSignIn');
-    const tabSignUp = document.getElementById('authTabSignUp');
-    const tabPhone = document.getElementById('authTabPhone');
-    const titleEl = document.getElementById('authModalTitle');
-    const nameField = document.getElementById('authNameField');
-    const submitText = document.getElementById('authSubmitText');
     const errorEl = document.getElementById('authErrorMessage');
-    const authForm = document.getElementById('authForm');
-    const authPhoneContainer = document.getElementById('authPhoneContainer');
-    const googleBtn = document.querySelector('#authModal button[onclick*="handleGoogleAuth"]');
-    const divider = document.querySelector('#authModal .my-4');
-
     if (errorEl) errorEl.classList.add('hidden');
-
-    const updateTabPill = (btn, active) => {
-      if (!btn) return;
-      btn.classList.toggle('bg-primary-container', active);
-      btn.classList.toggle('text-white', active);
-      btn.classList.toggle('shadow-sm', active);
-      btn.classList.toggle('text-on-surface-variant', !active);
-    };
-
-    updateTabPill(tabSignIn, tab === 'signin');
-    updateTabPill(tabSignUp, tab === 'signup');
-    updateTabPill(tabPhone, tab === 'phone');
-
-    if (tab === 'phone') {
-      if (titleEl) titleEl.textContent = "Sign In with Mobile OTP";
-      if (authForm) authForm.classList.add('hidden');
-      if (authPhoneContainer) authPhoneContainer.classList.remove('hidden');
-      if (googleBtn) googleBtn.classList.remove('hidden');
-      if (divider) divider.classList.add('hidden');
-    } else {
-      if (authForm) authForm.classList.remove('hidden');
-      if (authPhoneContainer) authPhoneContainer.classList.add('hidden');
-      if (googleBtn) googleBtn.classList.remove('hidden');
-      if (divider) divider.classList.remove('hidden');
-
-      const roleSection = document.getElementById('authRoleSection');
-      if (tab === 'signin') {
-        if (titleEl) titleEl.textContent = "Sign In to InSightLiker";
-        if (nameField) nameField.classList.add('hidden');
-        if (submitText) submitText.textContent = "Sign In";
-        if (roleSection) roleSection.classList.add('hidden');
-      } else {
-        if (titleEl) titleEl.textContent = "Create Free Account";
-        if (nameField) nameField.classList.remove('hidden');
-        if (submitText) submitText.textContent = "Create Account";
-        if (roleSection) roleSection.classList.remove('hidden');
-      }
-    }
+    this.openModal('authModal');
   }
 
   async handleSendPhoneOtp() {
@@ -2887,6 +2833,19 @@ class LandApp {
     const errorEl = document.getElementById('authErrorMessage');
     if (errorEl) errorEl.classList.add('hidden');
 
+    const roleRadio = document.querySelector('input[name="authRole"]:checked');
+    const role = roleRadio ? roleRadio.value : 'buyer';
+    if (window.firebaseAuth) {
+      window.firebaseAuth.currentRole = role;
+      localStorage.setItem('insightliker_auth_role', role);
+    }
+
+    const googleBtn = document.getElementById('authGoogleBtn');
+    if (googleBtn) {
+      googleBtn.disabled = true;
+      googleBtn.classList.add('opacity-75', 'cursor-wait');
+    }
+
     try {
       const res = await window.firebaseAuth.signInWithGoogle();
       this.applyAccount(res.user);
@@ -2900,7 +2859,42 @@ class LandApp {
         errorEl.textContent = err.message || "Google Sign-In failed.";
         errorEl.classList.remove('hidden');
       }
+    } finally {
+      if (googleBtn) {
+        googleBtn.disabled = false;
+        googleBtn.classList.remove('opacity-75', 'cursor-wait');
+      }
     }
+  }
+
+  handleDemoLogin(role) {
+    const demoUser = role === 'seller' ? {
+      id: 'user-seller',
+      uid: 'user-seller',
+      name: 'K. Ramakrishna Rao',
+      displayName: 'K. Ramakrishna Rao',
+      email: 'seller@insightliker.com',
+      role: 'seller',
+      phone: '+91 98480 12345',
+      isVerified: true,
+      provider: 'google.com'
+    } : {
+      id: 'user-buyer',
+      uid: 'user-buyer',
+      name: 'Anitha Reddy',
+      displayName: 'Anitha Reddy',
+      email: 'buyer@insightliker.com',
+      role: 'buyer',
+      phone: '+91 90000 11111',
+      isVerified: true,
+      provider: 'google.com'
+    };
+    this.applyAccount(demoUser);
+    this.syncServerProperties();
+    this.closeModal('authModal');
+    this.showToast(`Logged in as demo ${role === 'seller' ? 'landowner' : 'buyer'}.`);
+    if (role === 'seller') window.location.hash = 'dashboard';
+    else if (this.currentView === 'dashboard') this.renderDashboard();
   }
 
   async handleSignOut() {
